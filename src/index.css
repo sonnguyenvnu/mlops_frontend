@@ -1,3 +1,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@keyframes ping {
+    30%,
+    100% {
+        transform: scale(1.02);
+        opacity: 0.6;
+    }
+}
