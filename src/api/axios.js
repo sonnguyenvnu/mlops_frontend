@@ -3,20 +3,9 @@ import Cookies from 'universal-cookie'
 
 const cookies = new Cookies()
 
-const getHeader = () => {
-  let headers = { 'Content-Type': 'application/json' }
-  if (cookies.get('accessToken')) {
-    headers = { ...headers, 'X-ACCESS-TOKEN': cookies.get('accessToken') }
-  }
-  if (cookies.get('refreshToken')) {
-    headers = { ...headers, 'X-REFRESH-TOKEN': cookies.get('refreshToken') }
-  }
-  return headers
-}
-
 const instance = axios.create({
   baseURL: process.env.REACT_APP_API_URL,
-  headers: getHeader(),
+  withCredentials: true,
 })
 
 const refreshToken = () => {

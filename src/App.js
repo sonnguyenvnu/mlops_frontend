@@ -1,17 +1,10 @@
-import React, { useState } from 'react'
+import { useRoutes } from 'react-router-dom'
 import './App.css'
-import NavBar from './components/NavBar'
-import Login from './pages/login'
-import UploadFolder from './components/UploadFolder'
-import Project from './pages/project'
+import routes from './routes/routes'
 
 const App = () => {
-  return (
-    <div className="app">
-      <Login />
-      <Project />
-    </div>
-  )
+  const appRoutes = useRoutes(routes)
+  return appRoutes
 }
 
 export default App

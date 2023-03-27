@@ -1,9 +1,9 @@
-import React, { useState } from 'react'
+import React, { forwardRef, useState } from 'react'
 import { uploadFiles } from '../api/project'
-import { UploadTypes } from '../data/constants'
+import { UploadTypes } from '../assets/data/constants'
 import { validateFiles } from '../utils/file'
 
-const UploadFolder = ({ projectID }) => {
+const UploadFolder = ({ projectID, uploadedImages }) => {
   const [files, setFiles] = useState([])
 
   const handleImageChange = (e) => {
@@ -33,8 +33,8 @@ const UploadFolder = ({ projectID }) => {
       }
 
       try {
-        const res = await uploadFiles(projectID, formData)
-        console.log(res)
+        const { data } = await uploadFiles(projectID, formData)
+        uploadedImages(data.files, data.labels)
       } catch (error) {
         console.error(error)
       }
@@ -44,14 +44,28 @@ const UploadFolder = ({ projectID }) => {
     // Nêú folder chỉ có toàn ảnh không có folder con thì hiển thị lỗi
   }
 
+  const trainModel = () => {
+    fetch(`${process.env.REACT_APP_ML_SERVICE_ADDR}/clf/train`, {
+      method: 'POST',
+    })
+      .then((res) => res.json())
+      .then((data) => console.log(data))
+      .catch((err) => console.log(err))
+  }
+
   return (
-    <div>
+    <div className="flex justify-center items-center flex-col">
       <form encType="multipart/form-data">
         <input type="file" name="files" webkitdirectory="true" onChange={handleImageChange} />
-        <input type="submit" value="Upload" onClick={uploadFolder} />
+        <input
+          type="submit"
+          value="Upload"
+          onClick={uploadFolder}
+          className="cursor-pointer inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+        />
       </form>
     </div>
   )
 }
 
-export default UploadFolder
+export default forwardRef(UploadFolder)

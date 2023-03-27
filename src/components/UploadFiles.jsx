@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
-import { UploadTypes } from '../data/constants'
+import { UploadTypes } from '../assets/data/constants'
 import { uploadFiles } from '../api/project'
 import { validateFiles } from '../utils/file'
 
-const UploadFiles = ({ projectID }) => {
+const UploadFiles = ({ projectID, uploadedImages }) => {
   const [fileBlobs, setFileBlobs] = useState([])
   const [files, setFiles] = useState([])
 
@@ -14,10 +14,10 @@ const UploadFiles = ({ projectID }) => {
 
       // console.log("filesArray: ", filesArray);
 
-      setFileBlobs((prevImages) => prevImages.concat(filesArray))
-      Array.from(e.target.files).map(
-        (file) => URL.revokeObjectURL(file) // avoid memory leak
-      )
+      // setFileBlobs((prevImages) => prevImages.concat(filesArray))
+      // Array.from(e.target.files).map(
+      //   (file) => URL.revokeObjectURL(file) // avoid memory leak
+      // )
     }
   }
 
@@ -40,8 +40,8 @@ const UploadFiles = ({ projectID }) => {
       })
 
       try {
-        const res = await uploadFiles(projectID, formData)
-        console.log(res)
+        const { data } = await uploadFiles(projectID, formData)
+        uploadedImages(data.files, data.labels)
       } catch (error) {
         console.error(error)
       }
@@ -53,12 +53,7 @@ const UploadFiles = ({ projectID }) => {
       <div className="heading">Upload images</div>
       <div>
         <input type="file" id="file" multiple onChange={handleImageChange} />
-        <div className="label-holder">
-          <label htmlFor="file" className="label">
-            <i className="material-icons">Select</i>
-          </label>
-        </div>
-        <div className="result">{renderPhotos(fileBlobs)}</div>
+        {/* <div className="result">{renderPhotos(fileBlobs)}</div> */}
       </div>
       <div className="container">
         <button className="btn-primary" onClick={uploadImages}>
