@@ -129,13 +129,17 @@ const types = [
   },
 ]
 
-const StepThree = () => {
+const StepThree = ({ updateFields }) => {
   const [openOptions, setOpenOptions] = useState(false)
   const [openAugmentation, setOpenAugmentation] = useState(false)
   const [value, setValue] = useState(50)
 
   function handleChange(event) {
     setValue(event.target.value)
+  }
+
+  const goToNextStep = () => {
+    updateFields({ isDoneStepThree: true })
   }
 
   const [selectedType, setSelectedType] = useState(types[0])
@@ -201,8 +205,9 @@ const StepThree = () => {
                     </h3>
 
                     <div className="images-container flex flex-wrap gap-y-4 justify-center">
-                      {types.map((item) => (
+                      {types.map((item, index) => (
                         <div
+                          key={index}
                           className="flex flex-col justify-between w-[90px] items-center gap-1 item rounded-md hover:shadow overflow-hidden border-transparent hover:border-[#f0f] border-[2px] hover:font-[600] hover:text-[16px] focus:font-[600] focus:text-[16px] px-[3px] pt-[2px] hover:bg-gray-200"
                           onClick={() => {
                             setSelectedType(types[item.id])
@@ -610,13 +615,21 @@ const StepThree = () => {
           </div>
         </Dialog>
       </Transition.Root>
-      <button
-        type="button"
-        onClick={trainModel}
-        className="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto"
-      >
-        Train
-      </button>
+      <div className="flex flex-col mt-5 items-center justify-center">
+        <h1>Training in progress</h1>
+        <br />
+        <button
+          onClick={() => {
+            // message.success('Training', 3)
+            // goToNextStep()
+            trainModel()
+          }}
+          className="rounded-md bg-indigo-600 py-[6px] px-4 text-white"
+          // hidden
+        >
+          Data Augmentation
+        </button>
+      </div>
     </div>
   )
 }
