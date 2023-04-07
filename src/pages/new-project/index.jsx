@@ -5,7 +5,9 @@ import StepFour from './steps/step_four'
 import StepOne from './steps/step_one'
 import StepThree from './steps/step_three'
 import StepTwo from './steps/step_two'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
+import { listImages } from '../../api/project'
 
 const stepData = [
   { id: '01', name: 'Upload', href: '/app/new-project/step1', status: 'complete' },
@@ -14,13 +16,12 @@ const stepData = [
   { id: '04', name: 'Predict', href: '#', status: 'upcoming' },
 ]
 
-export default function NewProject() {
+export default function NewProject(props) {
   // const [steps, setStep] = useState({
   //   stepsItems: ['Profile', 'Contact', 'Identity', 'Passport'],
   //   currentStep: 2,
   // })
   function updateFields(fields) {
-    console.log(fields)
     if (fields.isDoneStepOne) {
       next()
     }
@@ -37,7 +38,24 @@ export default function NewProject() {
       return { ...prev, ...fields }
     })
   }
+
+  const location = useLocation()
   const [data, setData] = useState({})
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search)
+
+    async function fetchListLabelingImages(id) {
+      const { data } = await listImages(id)
+      setData(data)
+    }
+    const id = searchParams.get('id')
+    console.log(id)
+    if (id) {
+      fetchListLabelingImages(id)
+      goTo(1)
+    }
+  }, [])
+
   const { steps, currentStepIndex, step, isFirstStep, isLastStep, back, next, goTo } =
     useMultistepForm([
       <StepOne {...data} updateFields={updateFields} />,
@@ -56,31 +74,31 @@ export default function NewProject() {
           <ul aria-label="Steps" className="items-center text-gray-600 font-medium md:flex">
             {stepData.map((item, idx) => (
               <li
-                aria-current={currentStepIndex === idx + 1 ? 'step' : false}
+                aria-current={currentStepIndex === idx ? 'step' : false}
                 className="flex-1 last:flex-none flex gap-x-2 md:items-center"
               >
                 <div className="flex items-center flex-col gap-x-2">
                   <div
                     className={`w-8 h-8 rounded-full border-2 flex-none flex items-center justify-center ${
-                      currentStepIndex > idx + 1
+                      currentStepIndex > idx
                         ? 'bg-indigo-600 border-indigo-600'
-                        : '' || currentStepIndex == idx + 1
+                        : '' || currentStepIndex == idx
                         ? 'border-indigo-600'
                         : ''
                     }`}
                   >
                     <span
                       className={` ${
-                        currentStepIndex > idx + 1
+                        currentStepIndex > idx
                           ? 'hidden'
-                          : '' || currentStepIndex == idx + 1
+                          : '' || currentStepIndex == idx
                           ? 'text-indigo-600'
                           : ''
                       }`}
                     >
                       {idx + 1}
                     </span>
-                    {currentStepIndex > idx + 1 ? (
+                    {currentStepIndex > idx ? (
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
@@ -101,24 +119,24 @@ export default function NewProject() {
                   </div>
                   <hr
                     className={`h-12 border md:hidden ${
-                      idx + 1 == steps.length
+                      idx == steps.length
                         ? 'hidden'
-                        : '' || currentStepIndex > idx + 1
+                        : '' || currentStepIndex > idx
                         ? 'border-indigo-600'
                         : ''
                     }`}
                   />
                 </div>
                 <div className="h-8 flex items-center md:h-auto">
-                  <h3 className={`text-sm ${currentStepIndex == idx + 1 ? 'text-indigo-600' : ''}`}>
+                  <h3 className={`text-sm ${currentStepIndex == idx ? 'text-indigo-600' : ''}`}>
                     {item.name}
                   </h3>
                 </div>
                 <hr
                   className={`hidden mr-2 w-full border md:block ${
-                    idx + 1 == steps.length
+                    idx == steps.length
                       ? 'hidden'
-                      : '' || currentStepIndex > idx + 1
+                      : '' || currentStepIndex > idx
                       ? 'border-indigo-600'
                       : ''
                   }`}
@@ -127,6 +145,7 @@ export default function NewProject() {
             ))}
           </ul>
         </div>
+
         {steps[currentStepIndex]}
         {/*steps content  */}
         <div className="content mt-5">{/* <h1>{step}</h1> */}</div>

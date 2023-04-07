@@ -15,7 +15,6 @@ const StepOne = ({ name, email, updateFields }) => {
     setUploadedFiles(files)
   }
   const handleRemoveFile = (index) => {
-    console.log(index)
     setUploadedFiles((prevState) => {
       const newState = [...prevState]
       newState.splice(index, 1)

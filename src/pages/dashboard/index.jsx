@@ -1,5 +1,10 @@
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { validateFiles } from '../../utils/file'
+import { UploadTypes } from '../../assets/data/constants'
+import * as projectAPI from '../../api/project'
 import logo from '../../assets/images/logo.png'
+import { message } from 'antd'
 const buildOptions = [
   {
     id: 0,
@@ -13,19 +18,6 @@ const buildOptions = [
   },
   {
     id: 1,
-
-    title: 'Segmentation',
-    subtitle: (
-      <span>
-        I want to identify <strong>objects</strong> by painting <strong>pixels</strong> on them
-      </span>
-    ),
-    icon: logo,
-  },
-
-  {
-    id: 2,
-
     title: 'Object Detection',
     subtitle: (
       <span>
@@ -34,26 +26,66 @@ const buildOptions = [
     ),
     icon: logo,
   },
+  {
+    id: 2,
+    title: 'Segmentation',
+    subtitle: (
+      <span>
+        I want to identify <strong>objects</strong> by painting <strong>pixels</strong> on them
+      </span>
+    ),
+    icon: logo,
+  },
 ]
 
 const Dashboard = () => {
+  const navigate = useNavigate()
   const [show, setShow] = useState(false)
   const [showUploader, setShowUploader] = useState(false)
   const [selectedBuild, setSelectedBuild] = useState()
-  const [uploadedFiles, setUploadedFiles] = useState([])
+  const [uploadFiles, setUploadFiles] = useState([])
 
   const handleFileChange = (event) => {
     const files = Array.from(event.target.files)
-    console.log(files)
-    setUploadedFiles(files)
+    const validFiles = validateFiles(files)
+    setUploadFiles(validFiles)
   }
   const handleRemoveFile = (index) => {
-    setUploadedFiles((prevState) => {
+    setUploadFiles((prevState) => {
       const newState = [...prevState]
       newState.splice(index, 1)
       return newState
     })
   }
+
+  const uploadImages = async (e) => {
+    e.preventDefault()
+    if (uploadFiles !== undefined && uploadFiles.length > 0) {
+      console.log(`Uploading ${uploadFiles.length} file(s) to server`)
+      const formData = new FormData()
+      formData.append('type', UploadTypes.FOLDER)
+      for (let i = 0; i < uploadFiles.length; i++) {
+        // Convert file name with relative path to base64 string
+        const fileNameBase64 = window.btoa(uploadFiles[i].webkitRelativePath)
+        formData.append('files', uploadFiles[i], fileNameBase64)
+      }
+
+      // TODO: Remove this line
+      const projectID = '640da6da6bfb52418c8c966a'
+      const queryString = new URLSearchParams({ id: projectID }).toString()
+      try {
+        const { data } = await projectAPI.uploadFiles(projectID, formData)
+        message.success('Successfully uploaded', 3)
+        navigate(`/app/new-project?${queryString}`, { replace: true })
+      } catch (error) {
+        console.error(error)
+      }
+    }
+
+    // TODO: validate folder structure
+    // Nêú folder chỉ có toàn ảnh không có folder con thì hiển thị lỗi
+  }
+
   return (
     <>
       {/* classify model */}
@@ -245,10 +277,10 @@ const Dashboard = () => {
         </button>
         <div className="h-[3000px] overflow-auto py-[100px] w-[calc(100vw-20px)]">
           <h3 className="text-center w-full text-[24px] font-[500] leading-[1.16] mb-8 ">
-            Unclassified images upload
+            Classified images upload
           </h3>
           <label
-            for="classification"
+            htmlFor="classification"
             className="container flex justify-around items-center mx-auto border-[2px] border-dashed border-gray-500 p-5 rounded-[15px]"
           >
             <div className="w-full h-full bg-white p-10 rounded-md cursor-pointer">
@@ -260,7 +292,7 @@ const Dashboard = () => {
                 />
 
                 <p className="text-center text-[12px] font-[300]">
-                  We accept JPEG, PNG, BMP image format
+                  We accept JPEG, PNG image format
                 </p>
               </div>
             </div>
@@ -279,9 +311,9 @@ const Dashboard = () => {
             </div>
             <input
               type="file"
-              name=""
+              name="files"
+              webkitdirectory="true"
               id="classification"
-              multiple
               className="hidden"
               onChange={handleFileChange}
               onClick={(event) => {
@@ -290,19 +322,20 @@ const Dashboard = () => {
             />
           </label>
           <br />
-          <div className="text-center mx-auto">
-            {uploadedFiles.length} Image(s) Ready for Upload
-          </div>
+          <div className="text-center mx-auto">{uploadFiles.length} Image(s) Ready for Upload</div>
           <br />
           <div className="flex justify-between items-center">
             <span className="mr-auto text-start font-[100] mt-[20px]">Upload Preview</span>
-            <button className="bg-blue-700 rounded-[10px] text-[14px] text-white font-[400] py-[8px] px-[15px]">
-              Upload {uploadedFiles.length} Image(s)
+            <button
+              className="bg-blue-700 rounded-[10px] text-[14px] text-white font-[400] py-[8px] px-[15px]"
+              onClick={uploadImages}
+            >
+              Upload {uploadFiles.length} Image(s)
             </button>
           </div>
           <div className="h-[2px] bg-gray-100 w-full my-5"></div>
           <div className="grid grid-cols-6 gap-3 transition-all duration-300">
-            {uploadedFiles.map((file, index) => (
+            {uploadFiles.map((file, index) => (
               <div className="rounded-md overflow-hidden relative group hover:opacity-100">
                 <button
                   className="absolute cursor-pointer right-2 top-2 bg-white flex justify-center items-center rounded-full h-[20px] w-[20px] opacity-0 group-hover:opacity-100"

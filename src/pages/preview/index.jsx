@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react'
 import { Fragment } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline'
+import { message } from 'antd'
 
 const LabelSelector = ({ current, labels, setLabels }) => {
   const [currentLabel, setCurrentLabel] = useState(current)
@@ -22,13 +23,16 @@ const LabelSelector = ({ current, labels, setLabels }) => {
       <select
         className="absolute mt-1 block rounded-md border-white py-2 pl-3 pr-10 text-base focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm bottom-0 left-0 w-fit border bg-[#1e2a37e6] text-white"
         onChange={handleOnChange}
-        defaultValue={labels.length === 0 ? 'unknown' : currentLabel}
+        defaultValue={labels && labels.length === 0 ? 'unknown' : currentLabel}
         value={currentLabel}
       >
         <option value="unknown">unknown</option>
-        {labels.map((label) => (
-          <option value={label}>{label}</option>
-        ))}
+        {labels &&
+          labels.map((label) => (
+            <option key={label.id} value={label.value}>
+              {label.value}
+            </option>
+          ))}
         <option value="new">Create label</option>
       </select>
       <Transition.Root show={open} as={Fragment}>
@@ -117,7 +121,7 @@ const LabelSelector = ({ current, labels, setLabels }) => {
   )
 }
 
-const Preview = ({ images, savedLabels }) => {
+const Preview = ({ images, savedLabels, next }) => {
   const [labels, setLabels] = useState(savedLabels)
   return (
     <div className="container w-full mx-auto">
@@ -126,10 +130,21 @@ const Preview = ({ images, savedLabels }) => {
         <button>Models</button>
       </div> */}
       <div className="flex flex-col bg-white shadow-xl rounded-md h-full p-10">
-        {/* <div className="flex justify-between items-center w-full my-5">
-          <label>Build</label>
-          <button>Train</button>
-        </div> */}
+        <div className="flex justify-between items-center w-full my-5">
+          <label>Label all your images to start training process</label>
+          <button
+            onClick={() => {
+              fetch(`${process.env.REACT_APP_ML_SERVICE_ADDR}/clf/train`)
+                .then((res) => res.json())
+                .then((data) => console.log(data))
+              message.success('Training in progress', 3)
+              next()
+            }}
+            className="rounded-md bg-indigo-600 py-[6px] px-4 text-white"
+          >
+            Train
+          </button>
+        </div>
         <div>
           <div className="grid grid-cols-4 gap-4">
             {images &&
@@ -137,8 +152,8 @@ const Preview = ({ images, savedLabels }) => {
                 <div className="relative flex justify-center hover:border hover:border-red-500 rounded-md overflow-hidden">
                   <img src={image.url} alt="" />
                   <LabelSelector
-                    current={image.label.length > 0 ? image.label : 'unlabeled'}
-                    labels={labels}
+                    current={image.label ?? 'unlabeled'}
+                    labels={savedLabels}
                     setLabels={setLabels}
                   />
                 </div>
