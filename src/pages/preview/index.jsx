@@ -1,8 +1,12 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { Fragment } from 'react'
+import { useLocation } from 'react-router-dom'
 import { Dialog, Transition } from '@headlessui/react'
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline'
 import { message } from 'antd'
+import useIntervalFetch from '../../hooks/useIntervalFetch'
+import Loading from '../../components/Loading'
+import { trainModel } from '../../api/project'
 
 const LabelSelector = ({ current, labels, setLabels }) => {
   const [currentLabel, setCurrentLabel] = useState(current)
@@ -26,7 +30,7 @@ const LabelSelector = ({ current, labels, setLabels }) => {
         defaultValue={labels && labels.length === 0 ? 'unknown' : currentLabel}
         value={currentLabel}
       >
-        <option value="unknown">unknown</option>
+        {!labels && <option value="unknown">unknown</option>}
         {labels &&
           labels.map((label) => (
             <option key={label.id} value={label.value}>
@@ -122,9 +126,66 @@ const LabelSelector = ({ current, labels, setLabels }) => {
 }
 
 const Preview = ({ images, savedLabels, next }) => {
+  const location = useLocation()
+  const searchParams = new URLSearchParams(location.search)
+  const [projectId, setProjectId] = useState(searchParams.get('id'))
   const [labels, setLabels] = useState(savedLabels)
+  const [triggerFetch, setTriggerFetch] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const { data } = useIntervalFetch(
+    'https://jsonplaceholder.typicode.com/posts/1',
+    1000,
+    null,
+    triggerFetch,
+    true
+  )
+  const handleTrain = async () => {
+    setTriggerFetch(true)
+    try {
+      const { data } = await trainModel(projectId)
+      console.log(data) 
+    } catch (error) {
+      console.error(error)
+    }
+  }
+  const handleDeploy = async () => {
+    // show loading
+    setIsLoading(true)
+    const res = await fetch(`${process.env.REACT_APP_ML_SERVICE_ADDR}/clf/deploy`)
+    const data = await res.json()
+    console.log(data)
+    setIsLoading(false)
+    // jump to next step
+    next()
+    next()
+  }
+
+  const handleStopTrain = async () => {
+    // setTriggerFetch(false)
+    try {
+      const { data } = await trainModel(projectId)
+      console.log(data) 
+    } catch (error) {
+      console.error(error)
+    }
+    // fetch(`${process.env.REACT_APP_ML_SERVICE_ADDR}/clf/stop`)
+    //   .then((res) => res.json())
+    //   .then((data) => console.log(data))
+    //   .catch((err) => console.error(err))
+  }
+  // useEffect(() => {
+  //   console.log('data', data)
+  //   if (data) {
+  //     setTimeout(() => {
+  //       message.success('Training completed', 3)
+  //       setTriggerFetch(false)
+  //     }, 5000)
+  //   }
+  // }, [data])
+
   return (
     <div className="container w-full mx-auto">
+      {isLoading && <Loading />}
       {/* <div className="flex justify-between items-center mt-5">
         <label>Flowers</label>
         <button>Models</button>
@@ -132,18 +193,32 @@ const Preview = ({ images, savedLabels, next }) => {
       <div className="flex flex-col bg-white shadow-xl rounded-md h-full p-10">
         <div className="flex justify-between items-center w-full my-5">
           <label>Label all your images to start training process</label>
-          <button
-            onClick={() => {
-              fetch(`${process.env.REACT_APP_ML_SERVICE_ADDR}/clf/train`)
-                .then((res) => res.json())
-                .then((data) => console.log(data))
-              message.success('Training in progress', 3)
-              next()
-            }}
-            className="rounded-md bg-indigo-600 py-[6px] px-4 text-white"
-          >
-            Train
-          </button>
+          {!data ? (
+            <button
+              onClick={handleTrain}
+              className="rounded-md bg-indigo-600 py-[6px] px-4 text-white"
+            >
+              Train
+            </button>
+          ) : (
+            <>
+              {triggerFetch ? (
+                <button
+                  onClick={handleStopTrain}
+                  className="rounded-md bg-red-600 py-[6px] px-4 text-white"
+                >
+                  Stop
+                </button>
+              ) : (
+                <button
+                  onClick={handleDeploy}
+                  className="rounded-md bg-indigo-600 py-[6px] px-4 text-white"
+                >
+                  Deploy
+                </button>
+              )}
+            </>
+          )}
         </div>
         <div>
           <div className="grid grid-cols-4 gap-4">

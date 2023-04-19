@@ -8,6 +8,7 @@ import Upload from '../pages/upload'
 import Preview from '../pages/preview'
 import NewProject from '../pages/new-project'
 import SignUp from '../pages/signup'
+import Profile from '../pages/profile'
 
 const routes = [
   {
@@ -23,6 +24,10 @@ const routes = [
     element: <SignUp />,
   },
   {
+    path: paths.PROFILE,
+    element: <Profile />,
+  },
+  {
     path: paths.DEFAULT,
     element: <DefaultLayout />,
     children: [
@@ -35,6 +40,7 @@ const routes = [
         path: paths.PROJECTS,
         element: <Projects />,
       },
+
       {
         path: '/app/upload',
         element: <Upload />,
