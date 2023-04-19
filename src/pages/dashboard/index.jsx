@@ -1,77 +1,50 @@
-import React, { useState } from 'react'
+import React, { useState, useReducer } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { validateFiles } from '../../utils/file'
 import { UploadTypes } from '../../assets/data/constants'
 import * as projectAPI from '../../api/project'
 import logo from '../../assets/images/logo.png'
 import { message } from 'antd'
-const buildOptions = [
-  {
-    id: 0,
-    title: 'Classification',
-    subtitle: (
-      <span>
-        I want to classify each <strong>image</strong> into different <strong>categories</strong>
-      </span>
-    ),
-    icon: logo,
-  },
-  {
-    id: 1,
-    title: 'Object Detection',
-    subtitle: (
-      <span>
-        I want to identify <strong>objects</strong> by drawing <strong>boxes</strong> around them
-      </span>
-    ),
-    icon: logo,
-  },
-  {
-    id: 2,
-    title: 'Segmentation',
-    subtitle: (
-      <span>
-        I want to identify <strong>objects</strong> by painting <strong>pixels</strong> on them
-      </span>
-    ),
-    icon: logo,
-  },
-]
-
+const initialState = {
+  show: false,
+  showUploader: false,
+  selectedBuild: null,
+  uploadFiles: [],
+}
 const Dashboard = () => {
   const navigate = useNavigate()
-  const [show, setShow] = useState(false)
-  const [showUploader, setShowUploader] = useState(false)
-  const [selectedBuild, setSelectedBuild] = useState()
-  const [uploadFiles, setUploadFiles] = useState([])
 
+  //state
+  const [dashboardState, updateState] = useReducer((pre, next) => {
+    return { ...pre, ...next }
+  }, initialState)
+
+  // handler
   const handleFileChange = (event) => {
     const files = Array.from(event.target.files)
     const validFiles = validateFiles(files)
-    setUploadFiles(validFiles)
+    updateState({ uploadFiles: validFiles })
   }
   const handleRemoveFile = (index) => {
-    setUploadFiles((prevState) => {
-      const newState = [...prevState]
-      newState.splice(index, 1)
-      return newState
-    })
+    const newState = [...dashboardState.uploadFiles]
+    newState.splice(index, 1)
+    updateState({ uploadFiles: newState })
   }
 
   const uploadImages = async (e) => {
     e.preventDefault()
-    if (uploadFiles !== undefined && uploadFiles.length > 0) {
-      console.log(`Uploading ${uploadFiles.length} file(s) to server`)
+    if (dashboardState.uploadFiles !== undefined && dashboardState.uploadFiles.length > 0) {
+      console.log(`Uploading ${dashboardState.uploadFiles.length} file(s) to server`)
       const formData = new FormData()
       formData.append('type', UploadTypes.FOLDER)
-      for (let i = 0; i < uploadFiles.length; i++) {
+      for (let i = 0; i < dashboardState.uploadFiles.length; i++) {
         // Convert file name with relative path to base64 string
-        const fileNameBase64 = window.btoa(uploadFiles[i].webkitRelativePath)
-        formData.append('files', uploadFiles[i], fileNameBase64)
+        const fileNameBase64 = window.btoa(dashboardState.uploadFiles[i].webkitRelativePath)
+        formData.append('files', dashboardState.uploadFiles[i], fileNameBase64)
       }
 
       // TODO: Remove this line
-      const projectID = '640da6da6bfb52418c8c966a'
+      const projectID = '641ac7fd897b5152aaa371e9'
       const queryString = new URLSearchParams({ id: projectID }).toString()
       try {
         const { data } = await projectAPI.uploadFiles(projectID, formData)
@@ -89,44 +62,10 @@ const Dashboard = () => {
   return (
     <>
       {/* classify model */}
-      {/* button for build  */}
-      <div className="flex flex-nowrap justify-around gap-5 px-[40px] mt-5">
-        {buildOptions.map((option) => (
-          <label
-            htmlFor={option.title}
-            className="border-[2px] flex justify-center items-center  text-[#051221] cursor-pointer text-[14px] transition-all duration-[200] border-solid hover:border-[#0A64FC] hover:bg-[#F5FAFF] rounded-[12px] transition-all duration-200"
-          >
-            <div className="icon m-4 mx-5 h-10 w-10 overflow-hidden">
-              <img src={option.icon} alt="" srcset="" className="object-contain w-full h-full" />
-            </div>
-
-            <div className="relative flex items-center py-4">
-              <div className="min-w-0 flex-1 text-sm">
-                <label htmlFor={option.title} className="font-medium text-gray-700">
-                  {option.title}
-                </label>
-                <p id={`${option.title}-description`} className="text-gray-500">
-                  {option.subtitle}
-                </p>
-              </div>
-              <div className="ml-3 flex h-5 items-center px-5">
-                <input
-                  id={option.title}
-                  aria-describedby={`${option.title}-description`}
-                  name="comments"
-                  type="radio"
-                  className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-                />
-                <label htmlFor={option.title} className="cursor-pointer"></label>
-              </div>
-            </div>
-          </label>
-        ))}
-      </div>
 
       {/* uploaded */}
       <div
-        onClick={() => setShow(true)}
+        onClick={() => updateState({ show: true })}
         // for="file"
         className="flex flex-col w-[95%] cursor-pointer mt-10 shadow justify-between mx-auto items-center p-[10px] gap-[5px] bg-[rgba(0,110,255,0.041)] h-[300px] rounded-[10px] "
       >
@@ -196,11 +135,13 @@ const Dashboard = () => {
       {/* bottom up modal of classify */}
       <div
         className={`${
-          show ? 'top-0 bottom-full z-[99999] opacity-100' : 'top-full bottom-0 opacity-0'
+          dashboardState.show
+            ? 'top-0 bottom-full z-[99999] opacity-100'
+            : 'top-full bottom-0 opacity-0'
         } fixed flex flex-col items-center h-full w-full px-[30px] justify-center bg-white  transition-all duration-500 ease`}
       >
         <button
-          onClick={() => setShow(false)}
+          onClick={() => updateState({ show: false })}
           className="absolute top-5 right-5 p-[12px] rounded-full bg-white hover:bg-gray-300 hover:text-white font-[600] w-[48px] h-[48px]"
         >
           <svg
@@ -219,7 +160,7 @@ const Dashboard = () => {
         </h3>
         <div className="container flex justify-around items-center mx-auto gap-4">
           <div
-            onClick={() => setShowUploader(true)}
+            onClick={() => updateState({ showUploader: true })}
             className="w-full h-full bg-white p-10 rounded-md hover:scale-[1.02] transition-all ease-linear duration-100   cursor-pointer shadow-[0px_8px_24px_rgba(0,53,133,0.1)]"
           >
             <div className="flex flex-col">
@@ -236,7 +177,7 @@ const Dashboard = () => {
             </div>
           </div>
           <div
-            onClick={() => setShowUploader(true)}
+            onClick={() => updateState({ showUploader: true })}
             className="w-full h-full bg-white p-10 rounded-md hover:scale-[1.02] transition-all ease-linear duration-100   cursor-pointer shadow-[0px_8px_24px_rgba(0,53,133,0.1)]"
           >
             <div className="flex flex-col">
@@ -253,15 +194,16 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
-
       {/* bottom up modal of classify image uploader */}
       <div
         className={`${
-          showUploader ? 'top-0 z-[99999] opacity-100' : 'top-full bottom-0 opacity-0'
+          dashboardState.showUploader
+            ? 'top-0 z-[99999] opacity-100'
+            : 'top-full bottom-0 opacity-0'
         } fixed flex flex-col items-center h-full w-full px-[30px] justify-center bg-white  transition-all duration-500 ease overscroll-auto overflow-auto min-h-screen`}
       >
         <button
-          onClick={() => setShowUploader(false)}
+          onClick={() => updateState({ showUploader: false })}
           className="absolute top-5 right-5 p-[12px] rounded-full bg-transparent hover:bg-gray-300 hover:text-white font-[600] w-[48px] h-[48px]"
         >
           <svg
@@ -322,7 +264,9 @@ const Dashboard = () => {
             />
           </label>
           <br />
-          <div className="text-center mx-auto">{uploadFiles.length} Image(s) Ready for Upload</div>
+          <div className="text-center mx-auto">
+            {dashboardState.uploadFiles.length} Image(s) Ready for Upload
+          </div>
           <br />
           <div className="flex justify-between items-center">
             <span className="mr-auto text-start font-[100] mt-[20px]">Upload Preview</span>
@@ -330,12 +274,12 @@ const Dashboard = () => {
               className="bg-blue-700 rounded-[10px] text-[14px] text-white font-[400] py-[8px] px-[15px]"
               onClick={uploadImages}
             >
-              Upload {uploadFiles.length} Image(s)
+              Upload {dashboardState.uploadFiles.length} Image(s)
             </button>
           </div>
           <div className="h-[2px] bg-gray-100 w-full my-5"></div>
-          <div className="grid grid-cols-6 gap-3 transition-all duration-300">
-            {uploadFiles.map((file, index) => (
+          <div className="grid grid-cols-6 gap-3 ">
+            {dashboardState.uploadFiles.map((file, index) => (
               <div className="rounded-md overflow-hidden relative group hover:opacity-100">
                 <button
                   className="absolute cursor-pointer right-2 top-2 bg-white flex justify-center items-center rounded-full h-[20px] w-[20px] opacity-0 group-hover:opacity-100"

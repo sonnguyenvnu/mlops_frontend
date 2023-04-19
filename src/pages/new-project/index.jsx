@@ -49,7 +49,6 @@ export default function NewProject(props) {
       setData(data)
     }
     const id = searchParams.get('id')
-    console.log(id)
     if (id) {
       fetchListLabelingImages(id)
       goTo(1)
@@ -74,7 +73,10 @@ export default function NewProject(props) {
           <ul aria-label="Steps" className="items-center text-gray-600 font-medium md:flex">
             {stepData.map((item, idx) => (
               <li
-                aria-current={currentStepIndex === idx ? 'step' : false}
+                onClick={() => {
+                  goTo(idx + 1)
+                }}
+                aria-current={currentStepIndex === idx + 1 ? 'step' : false}
                 className="flex-1 last:flex-none flex gap-x-2 md:items-center"
               >
                 <div className="flex items-center flex-col gap-x-2">

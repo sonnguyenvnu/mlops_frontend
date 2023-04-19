@@ -11,4 +11,8 @@ const listImages = (projectID) => {
   return instance.get(`/images?project_id=${projectID}`)
 }
 
-export { uploadFiles, listImages }
+const trainModel = (projectID) => {
+  return instance.post(`/projects/${projectID}/train`)
+}
+
+export { uploadFiles, listImages, trainModel }
