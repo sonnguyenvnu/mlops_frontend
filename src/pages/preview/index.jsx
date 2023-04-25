@@ -143,7 +143,7 @@ const Preview = ({ images, savedLabels, next }) => {
     setTriggerFetch(true)
     try {
       const { data } = await trainModel(projectId)
-      console.log(data) 
+      console.log(data)
     } catch (error) {
       console.error(error)
     }
@@ -164,7 +164,7 @@ const Preview = ({ images, savedLabels, next }) => {
     // setTriggerFetch(false)
     try {
       const { data } = await trainModel(projectId)
-      console.log(data) 
+      console.log(data)
     } catch (error) {
       console.error(error)
     }
@@ -198,7 +198,7 @@ const Preview = ({ images, savedLabels, next }) => {
               onClick={handleTrain}
               className="rounded-md bg-indigo-600 py-[6px] px-4 text-white"
             >
-              Train
+              Train Model
             </button>
           ) : (
             <>

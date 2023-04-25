@@ -11,9 +11,15 @@ const Login = () => {
   const cookies = new Cookies()
   const navigate = useNavigate()
   const writeCookies = ({ accessToken, refreshToken }) => {
-    cookies.set('accessToken', accessToken, { path: '/' })
+    const cookieOptions = {
+      domain: `.${process.env.REACT_APP_DOMAIN_NAME}`,
+      path: '/',
+      secure: true,
+      sameSite: 'none',
+    }
+    cookies.set('accessToken', accessToken, cookieOptions)
     if (refreshToken) {
-      cookies.set('refreshToken', refreshToken, { path: '/' })
+      cookies.set('refreshToken', refreshToken, cookieOptions)
     }
   }
   const onLogin = async (credential) => {
