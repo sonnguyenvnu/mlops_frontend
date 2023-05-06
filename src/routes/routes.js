@@ -1,6 +1,5 @@
 import Login from '../pages/login'
 import Dashboard from '../pages/dashboard'
-import Landing from '../pages/landing/Landing'
 import DefaultLayout from '../components/layouts/DefaultLayout'
 import { paths } from '../assets/data/routes'
 import Projects from '../pages/projects'
@@ -13,7 +12,7 @@ import Profile from '../pages/profile'
 const routes = [
   {
     path: paths.ROOT,
-    element: <Landing />,
+    element: <Login />,
   },
   {
     path: paths.LOGIN,

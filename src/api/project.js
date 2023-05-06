@@ -7,12 +7,12 @@ const uploadFiles = (projectID, files) => {
   return instance.post(`/projects/${projectID}/upload`, files, options)
 }
 
-const listImages = (projectID) => {
-  return instance.get(`/images?project_id=${projectID}`)
+const listImages = (projectID, queryString = '&page=1&size=24') => {
+  return instance.get(`/images?project_id=${projectID}${queryString}`)
 }
 
 const trainModel = (projectID) => {
   return instance.post(`/projects/${projectID}/train`)
 }
 
-export { uploadFiles, listImages, trainModel }
+export { listImages, trainModel, uploadFiles }

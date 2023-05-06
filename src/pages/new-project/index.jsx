@@ -1,13 +1,11 @@
-import { CheckIcon } from '@heroicons/react/24/solid'
-import { NavLink } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { useLocation } from 'react-router-dom'
+import { listImages } from '../../api/project'
 import { useMultistepForm } from '../../hooks/useMultiStepForm'
 import StepFour from './steps/step_four'
 import StepOne from './steps/step_one'
 import StepThree from './steps/step_three'
 import StepTwo from './steps/step_two'
-import { useState, useEffect } from 'react'
-import { useLocation } from 'react-router-dom'
-import { listImages } from '../../api/project'
 
 const stepData = [
   { id: '01', name: 'Upload', href: '/app/new-project/step1', status: 'complete' },
@@ -46,7 +44,10 @@ export default function NewProject(props) {
 
     async function fetchListLabelingImages(id) {
       const { data } = await listImages(id)
-      setData(data)
+      setData({
+        ...data.data,
+        pagination: data.meta,
+      })
     }
     const id = searchParams.get('id')
     if (id) {
@@ -54,6 +55,7 @@ export default function NewProject(props) {
       goTo(1)
     }
   }, [])
+  console.log(data)
 
   const { steps, currentStepIndex, step, isFirstStep, isLastStep, back, next, goTo } =
     useMultistepForm([
