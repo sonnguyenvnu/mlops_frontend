@@ -1,16 +1,20 @@
-import React, { useState, useReducer } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { validateFiles } from '../../utils/file'
-import { UploadTypes } from '../../assets/data/constants'
-import * as projectAPI from '../../api/project'
-import logo from '../../assets/images/logo.png'
 import { message } from 'antd'
+import React, { useReducer } from 'react'
+import { useNavigate } from 'react-router-dom'
+import * as projectAPI from '../../api/project'
+import { UploadTypes } from '../../assets/data/constants'
+import { validateFiles } from '../../utils/file'
+
+const LOAD_CHUNK = 10
+
 const initialState = {
   show: false,
   showUploader: false,
   selectedBuild: null,
   uploadFiles: [],
+  loadedChunk: LOAD_CHUNK,
 }
+
 const Dashboard = () => {
   const navigate = useNavigate()
 
@@ -22,8 +26,8 @@ const Dashboard = () => {
   // handler
   const handleFileChange = (event) => {
     const files = Array.from(event.target.files)
-    const validFiles = validateFiles(files)
-    updateState({ uploadFiles: validFiles })
+    const validatedFiles = validateFiles(files)
+    updateState({ uploadFiles: validatedFiles })
   }
   const handleRemoveFile = (index) => {
     const newState = [...dashboardState.uploadFiles]
@@ -33,6 +37,7 @@ const Dashboard = () => {
 
   const uploadImages = async (e) => {
     e.preventDefault()
+    if (dashboardState.uploadFiles.length === 0) return
     if (dashboardState.uploadFiles !== undefined && dashboardState.uploadFiles.length > 0) {
       console.log(`Uploading ${dashboardState.uploadFiles.length} file(s) to server`)
       const formData = new FormData()
@@ -59,6 +64,12 @@ const Dashboard = () => {
     // Nêú folder chỉ có toàn ảnh không có folder con thì hiển thị lỗi
   }
 
+  const handleLoadChunk = () => {
+    if (dashboardState.loadedChunk < dashboardState.uploadFiles.length) {
+      updateState({ loadedChunk: dashboardState.loadedChunk + LOAD_CHUNK })
+    }
+  }
+
   return (
     <>
       {/* classify model */}
@@ -67,7 +78,7 @@ const Dashboard = () => {
       <div
         onClick={() => updateState({ show: true })}
         // for="file"
-        className="flex flex-col w-[95%] cursor-pointer mt-10 shadow justify-between mx-auto items-center p-[10px] gap-[5px] bg-[rgba(0,110,255,0.041)] h-[300px] rounded-[10px] "
+        className="flex flex-col w-[95%] cursor-pointer my-10 shadow justify-between mx-auto items-center p-[10px] gap-[5px] bg-[rgba(0,110,255,0.041)]  rounded-[10px] h-[calc(100%-124px)]"
       >
         <div className="header flex flex-1 w-full border-[2px] justify-center items-center flex-col border-dashed border-[#4169e1] rounded-[10px]">
           <svg
@@ -76,6 +87,7 @@ const Dashboard = () => {
             height="100"
             fill="none"
             viewBox="0 0 100 100"
+            className="scale-150"
           >
             <mask
               id="mask0_908_734"
@@ -95,31 +107,7 @@ const Dashboard = () => {
               ></path>
             </g>
           </svg>
-          <p className="text-center text-black">Browse File to upload!</p>
-        </div>
-        <div
-          // for="file"
-          className="footer  bg-[rgba(0,110,255,0.075)] w-full h-[40px] p-2 flex rounded-[10px] cursor-pointer justify-between border-none text-black"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 32 32"
-            className="h-[130%] fill-[#4169e1] bg-[rgba(70,66,66,0.103)] rounded-full px-[2px] cursor-pointer shadow-[0_2px_30px_rgba(0,0,0,0.205)]"
-          >
-            <g>
-              <path d="M15.331 6H8.5v20h15V14.154h-8.169z"></path>
-              <path d="M18.153 6h-.009v5.342H23.5v-.002z"></path>
-            </g>
-          </svg>
-
-          <p>Not selected file</p>
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <g stroke="#000" strokeWidth="2">
-              <path d="M5.166 10.153A2 2 0 017.16 8h9.68a2 2 0 011.994 2.153l-.692 9A2 2 0 0116.148 21H7.852a2 2 0 01-1.994-1.847l-.692-9z"></path>
-              <path strokeLinecap="round" d="M19.5 5h-15"></path>
-              <path d="M10 3a1 1 0 011-1h2a1 1 0 011 1v2h-4V3z"></path>
-            </g>
-          </svg>
+          <p className="text-center text-black mt-5">Browse File to upload!</p>
         </div>
         <input
           id="file"
@@ -203,7 +191,7 @@ const Dashboard = () => {
         } fixed flex flex-col items-center h-full w-full px-[30px] justify-center bg-white  transition-all duration-500 ease overscroll-auto overflow-auto min-h-screen`}
       >
         <button
-          onClick={() => updateState({ showUploader: false })}
+          onClick={() => updateState({ showUploader: false, uploadFiles: [] })}
           className="absolute top-5 right-5 p-[12px] rounded-full bg-transparent hover:bg-gray-300 hover:text-white font-[600] w-[48px] h-[48px]"
         >
           <svg
@@ -268,8 +256,8 @@ const Dashboard = () => {
             {dashboardState.uploadFiles.length} Image(s) Ready for Upload
           </div>
           <br />
-          <div className="flex justify-between items-center">
-            <span className="mr-auto text-start font-[100] mt-[20px]">Upload Preview</span>
+          <div className="flex justify-between items-center ">
+            <span className="mr-auto text-start font-[100]">Upload Preview</span>
             <button
               className="bg-blue-700 rounded-[10px] text-[14px] text-white font-[400] py-[8px] px-[15px]"
               onClick={uploadImages}
@@ -279,7 +267,7 @@ const Dashboard = () => {
           </div>
           <div className="h-[2px] bg-gray-100 w-full my-5"></div>
           <div className="grid grid-cols-6 gap-3 ">
-            {dashboardState.uploadFiles.map((file, index) => (
+            {dashboardState.uploadFiles.slice(0, dashboardState.loadedChunk).map((file, index) => (
               <div className="rounded-md overflow-hidden relative group hover:opacity-100">
                 <button
                   className="absolute cursor-pointer right-2 top-2 bg-white flex justify-center items-center rounded-full h-[20px] w-[20px] opacity-0 group-hover:opacity-100"
@@ -307,6 +295,15 @@ const Dashboard = () => {
               </div>
             ))}
           </div>
+
+          {dashboardState.loadedChunk < dashboardState.uploadFiles.length && (
+            <button
+              className="mx-auto flex mt-5 bg-blue-700 rounded-[10px] text-[14px] text-white font-[400] py-[8px] px-[15px]"
+              onClick={handleLoadChunk}
+            >
+              Load more
+            </button>
+          )}
         </div>
       </div>
     </>

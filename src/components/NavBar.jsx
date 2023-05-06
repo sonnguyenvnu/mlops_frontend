@@ -1,18 +1,18 @@
-import { Fragment } from 'react'
-import ActiveLink from './common/ActiveLink'
 import { Disclosure, Menu, Transition } from '@headlessui/react'
-import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/react/24/outline'
-import logo from '../assets/images/logo.png'
+import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
+import { Fragment } from 'react'
 import { paths } from '../assets/data/routes'
+import logo from '../assets/images/logo.png'
+import ActiveLink from './common/ActiveLink'
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ')
 }
 
 const NavBar = () => {
-  const defaultClassName =
+  const defaultclassname =
     'inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700'
-  const activeClassName =
+  const activeclassname =
     'inline-flex items-center border-b-2 border-indigo-500 px-1 pt-1 text-sm font-medium text-gray-900'
 
   return (
@@ -41,16 +41,16 @@ const NavBar = () => {
                   {/* Current: "border-indigo-500 text-gray-900", Default: "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700" */}
                   <ActiveLink
                     to={paths.DASHBOARD}
-                    defaultClassName={defaultClassName}
-                    activeClassName={activeClassName}
+                    defaultClassName={defaultclassname}
+                    activeClassName={activeclassname}
                     // className={({ isActive }) => (isActive ? activeClassName : defaultClassName)}
                   >
                     Dashboard
                   </ActiveLink>
                   <ActiveLink
                     to={paths.PROJECTS}
-                    defaultClassName={defaultClassName}
-                    activeClassName={activeClassName}
+                    defaultClassName={defaultclassname}
+                    activeClassName={activeclassname}
                     // className={({ isActive }) => (isActive ? activeClassName : defaultClassName)}
                   >
                     Projects
@@ -58,14 +58,6 @@ const NavBar = () => {
                 </div>
               </div>
               <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
-                <button
-                  type="button"
-                  className="rounded-full bg-white p-1 text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                >
-                  <span className="sr-only">View notifications</span>
-                  <BellIcon className="h-6 w-6" aria-hidden="true" />
-                </button>
-
                 {/* Profile dropdown */}
                 <Menu as="div" className="relative ml-3">
                   <div>

@@ -1,7 +1,7 @@
-import React, { useReducer } from 'react'
+import React, { useEffect, useReducer } from 'react'
 import { UploadTypes } from '../../../assets/data/constants'
-import { validateFiles } from '../../../utils/file'
 import Loading from '../../../components/Loading'
+import { validateFiles } from '../../../utils/file'
 
 const initialState = {
   showUploadModal: false,
@@ -15,7 +15,8 @@ const initialState = {
   confidenceLabel: '',
   confidenceScore: 0,
 }
-const StepFour = () => {
+const StepFour = (props) => {
+  const { experiment_name } = props
   const [stepFourState, updateState] = useReducer(
     (pre, next) => ({ ...pre, ...next }),
     initialState
@@ -96,7 +97,7 @@ const StepFour = () => {
 
   return (
     <>
-      <div className="mt-20 flex justify-center items-center">
+      <div className="mt-20 flex justify-center items-center flex-col gap-6">
         <button
           onClick={() => {
             updateState({ showUploadModal: true })
@@ -245,29 +246,6 @@ const StepFour = () => {
                 </g>
               </svg>
               <p className="text-center text-black">Browse File to upload!</p>
-            </div>
-            <div
-              // for="file"
-              className="footer  bg-[rgba(0,110,255,0.075)] w-full h-[40px] p-2 flex rounded-[10px] cursor-pointer justify-between border-none text-black"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 32 32"
-                className="h-[130%] fill-[#4169e1] bg-[rgba(70,66,66,0.103)] rounded-full px-[2px] cursor-pointer shadow-[0_2px_30px_rgba(0,0,0,0.205)]"
-              >
-                <g>
-                  <path d="M15.331 6H8.5v20h15V14.154h-8.169z"></path>
-                  <path d="M18.153 6h-.009v5.342H23.5v-.002z"></path>
-                </g>
-              </svg>
-              <p>Not selected file</p>
-              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <g stroke="#000" strokeWidth="2">
-                  <path d="M5.166 10.153A2 2 0 017.16 8h9.68a2 2 0 011.994 2.153l-.692 9A2 2 0 0116.148 21H7.852a2 2 0 01-1.994-1.847l-.692-9z"></path>
-                  <path strokeLinecap="round" d="M19.5 5h-15"></path>
-                  <path d="M10 3a1 1 0 011-1h2a1 1 0 011 1v2h-4V3z"></path>
-                </g>
-              </svg>
             </div>
             <input
               id="file"
