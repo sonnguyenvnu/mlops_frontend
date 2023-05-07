@@ -44,6 +44,7 @@
     ]
   },
   "devDependencies": {
+    "dayjs": "^1.11.7",
     "tailwindcss": "^3.2.7"
   }
 }

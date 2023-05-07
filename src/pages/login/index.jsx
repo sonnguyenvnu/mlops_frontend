@@ -12,10 +12,10 @@ const Login = () => {
   const navigate = useNavigate()
   const writeCookies = ({ accessToken, refreshToken }) => {
     const cookieOptions = {
-      domain: `.${process.env.REACT_APP_DOMAIN_NAME}`,
+      // domain: `.${process.env.REACT_APP_DOMAIN_NAME}`,
       path: '/',
-      secure: true,
-      sameSite: 'none',
+      // secure: true,
+      // sameSite: 'none',
     }
     cookies.set('accessToken', accessToken, cookieOptions)
     if (refreshToken) {

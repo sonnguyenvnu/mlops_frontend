@@ -43,7 +43,9 @@ const StepThree = (props) => {
               <p id="message" className="text-[20px] font-medium text-gray-900">
                 Provisioning TPU...
               </p>
-              <strong className="text-[20px] animate-pulse">{processValue}</strong>
+              {processValue && (
+                <strong className="text-[20px] animate-pulse">{processValue}</strong>
+              )}
             </div>
             <div className="mt-4" aria-hidden="true">
               <div className="overflow-hidden rounded-full bg-gray-200">

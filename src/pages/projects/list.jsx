@@ -1,198 +1,227 @@
-import { Fragment } from 'react'
-import { Disclosure, Menu, Transition } from '@headlessui/react'
-import {
-  BarsArrowUpIcon,
-  CheckBadgeIcon,
-  ChevronDownIcon,
-  ChevronRightIcon,
-  MagnifyingGlassIcon,
-  RectangleStackIcon,
-  StarIcon,
-} from '@heroicons/react/20/solid'
-import { Bars3CenterLeftIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import ProjectCard from './card'
+import { RectangleStackIcon } from '@heroicons/react/20/solid'
 import { PlusIcon } from '@heroicons/react/24/solid'
+import { useReducer, useEffect } from 'react'
+import instance from '../../api/axios'
+import { message } from 'antd'
 
-const navigation = [
-  { name: 'Dashboard', href: '#', current: true },
-  { name: 'Domains', href: '#', current: false },
-]
-const userNavigation = [
-  { name: 'Your Profile', href: '#' },
-  { name: 'Settings', href: '#' },
-  { name: 'Sign out', href: '#' },
-]
-const projects = [
-  {
-    name: 'Workcation',
-    href: '#',
-    siteHref: '#',
-    repoHref: '#',
-    repo: 'debbielewis/workcation',
-    tech: 'Laravel',
-    lastDeploy: '3h ago',
-    location: 'United states',
-    starred: true,
-    active: true,
-  },
-  // More projects...
-]
-
-const activityItems = [
-  { project: 'Workcation', commit: '2d89f0c8', environment: 'production', time: '1h' },
-  // More items...
-]
-
-function classNames(...classes) {
-  return classes.filter(Boolean).join(' ')
+const initialState = {
+  showUploader: false,
+  projects: [],
 }
-
 export default function ProjectList() {
+  const [dashboardState, updateState] = useReducer((pre, next) => {
+    return { ...pre, ...next }
+  }, initialState)
+
+  const handleCreateProject = async (event) => {
+    event.preventDefault()
+    const formData = new FormData(event.target)
+    const data = Object.fromEntries(formData)
+    console.log(data)
+    try {
+      const response = await instance.post('/projects', data, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
+
+      if (response.status === 200) {
+        window.location = `/app/new-project?id=${response.data._id}`
+      }
+    } catch (error) {
+      message.error('Project already existed')
+      console.log(error)
+    }
+  }
+  const getProjects = async () => {
+    const response = await instance.get('/projects')
+    updateState({ projects: response.data })
+    return response.data
+  }
+
+  useEffect(() => {
+    dashboardState.projects.length >= 0 && getProjects()
+  }, [])
   return (
     <>
-      {/*
-        This example requires updating your template:
-
-        ```
-        <html class="h-full">
-        <body class="h-full">
-        ```
-      */}
-      {/* Background color split screen for large screens */}
-      {/* <div className="fixed top-0 left-0 h-full w-1/2 bg-white" aria-hidden="true" />
-      <div className="fixed top-0 right-0 h-full w-1/2 bg-gray-50" aria-hidden="true" /> */}
       <div className="">
-        {/* Navbar */}
-
-        {/* 3 column wrapper */}
         <div className="mx-auto w-full flex-grow lg:flex xl:px-2 -z-10 mt-2">
           {/* Left sidebar & main wrapper */}
           <div className="min-w-0 flex-1 bg-white xl:flex p-5 rounded-md">
-            {/* Account profile */}
-            <div className="bg-white xl:w-64 xl:flex-shrink-0 xl:border-r xl:border-gray-200 xl-border-l">
-              <div className="py-6 pl-4 pr-6 sm:pl-6 lg:pl-8 xl:pl-0">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1 space-y-8">
-                    <div className="space-y-8 sm:flex sm:items-center sm:justify-between sm:space-y-0 xl:block xl:space-y-8">
-                      {/* Profile */}
-                      <div className="flex items-center space-x-3">
-                        <div className="h-12 w-12 flex-shrink-0">
-                          <img
-                            className="h-12 w-12 rounded-full"
-                            src="https://images.unsplash.com/photo-1517365830460-955ce3ccd263?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=256&h=256&q=80"
-                            alt=""
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <div className="text-sm font-medium text-gray-900">Debbie Lewis</div>
-                          <a href="#" className="group flex items-center space-x-2.5">
-                            <svg
-                              className="h-5 w-5 text-gray-400 group-hover:text-gray-500"
-                              aria-hidden="true"
-                              fill="currentColor"
-                              viewBox="0 0 20 20"
-                            >
-                              <path
-                                fillRule="evenodd"
-                                d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z"
-                                clipRule="evenodd"
-                              />
-                            </svg>
-                            <span className="text-sm font-medium text-gray-500 group-hover:text-gray-900">
-                              debbielewis
-                            </span>
-                          </a>
-                        </div>
-                      </div>
-                      {/* Action buttons */}
-                      <div className="flex flex-col sm:flex-row xl:flex-col">
-                        <button
-                          type="button"
-                          className="inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 cursor-pointer"
-                          onClick={() => (window.location = '/app/new-project')}
-                        >
-                          <PlusIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
-                          New Project
-                        </button>
-                      </div>
-                    </div>
-                    {/* Meta info */}
-                    <div className="flex flex-col space-y-6 sm:flex-row sm:space-y-0 sm:space-x-8 xl:flex-col xl:space-x-0 xl:space-y-6">
-                      <div className="flex items-center space-x-2">
-                        <RectangleStackIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
-                        <span className="text-sm font-medium text-gray-500">8 Projects</span>
-                      </div>
+            {/* Projects List */}
+            <div className="bg-white lg:min-w-0 lg:flex-1">
+              <div className="flex justify-between mx-auto max-w-7xl px-3 mb-5 ">
+                <div className=" max-w-2xl px-4 lg:max-w-4xl lg:px-0">
+                  <h1 className="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
+                    All your projects
+                  </h1>
+                  {/* Meta info */}
+                  <div className="flex mt-5 flex-col space-y-6 sm:flex-row sm:space-y-0 sm:space-x-8 xl:flex-col xl:space-x-0 xl:space-y-6">
+                    <div className="flex items-center space-x-2">
+                      <RectangleStackIcon className="h-5 w-5 text-gray-400" aria-hidden="true" />
+                      <span className="text-sm font-medium text-gray-500">
+                        {dashboardState.projects.length} Projects
+                      </span>
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
-
-            {/* Projects List */}
-            <div className="bg-white lg:min-w-0 lg:flex-1">
-              {/* <div className="border-b border-t border-gray-200 pl-4 pr-6 pt-4 pb-4 sm:pl-6 lg:pl-8 xl:border-t-0 xl:pl-6 xl:pt-6">
-                <div className="flex items-center">
-                  <h1 className="flex-1 text-lg font-medium">Projects</h1>
-                  <Menu as="div" className="relative">
-                    <Menu.Button className="inline-flex w-full justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                      <BarsArrowUpIcon className="mr-3 h-5 w-5 text-gray-400" aria-hidden="true" />
-                      Sort
-                      <ChevronDownIcon
-                        className="ml-2.5 -mr-1.5 h-5 w-5 text-gray-400"
-                        aria-hidden="true"
-                      />
-                    </Menu.Button>
-                    <Menu.Items className="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                      <div className="py-1">
-                        <Menu.Item>
-                          {({ active }) => (
-                            <a
-                              href="#"
-                              className={classNames(
-                                active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                                'block px-4 py-2 text-sm'
-                              )}
-                            >
-                              Name
-                            </a>
-                          )}
-                        </Menu.Item>
-                        <Menu.Item>
-                          {({ active }) => (
-                            <a
-                              href="#"
-                              className={classNames(
-                                active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                                'block px-4 py-2 text-sm'
-                              )}
-                            >
-                              Date modified
-                            </a>
-                          )}
-                        </Menu.Item>
-                        <Menu.Item>
-                          {({ active }) => (
-                            <a
-                              href="#"
-                              className={classNames(
-                                active ? 'bg-gray-100 text-gray-900' : 'text-gray-700',
-                                'block px-4 py-2 text-sm'
-                              )}
-                            >
-                              Date created
-                            </a>
-                          )}
-                        </Menu.Item>
-                      </div>
-                    </Menu.Items>
-                  </Menu>
+                {/* Action buttons */}
+                <div className="flex flex-col sm:flex-row xl:flex-col">
+                  <button
+                    type="button"
+                    className="inline-flex items-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 cursor-pointer h-fit"
+                    // onClick={() => (window.location = '/app/new-project')}
+                    onClick={() => updateState({ showUploader: true })}
+                  >
+                    <PlusIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
+                    New Project
+                  </button>
                 </div>
-              </div> */}
-              <ul role="list" className="divide-y divide-gray-200 border-b border-gray-200">
-                <ProjectCard />
-              </ul>
+              </div>
+
+              {dashboardState.projects.length > 0 ? (
+                <ul
+                  role="list"
+                  className="max-w-7xl px-3  mx-auto pt-5 overflow-hidden sm:grid sm:grid-cols-2 gap-3 py-4"
+                >
+                  {dashboardState.projects.map((project) => (
+                    <ProjectCard key={project._id} project={project} />
+                  ))}
+                </ul>
+              ) : (
+                <div className="text-center">
+                  <svg
+                    className="mx-auto h-12 w-12 text-gray-400"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    aria-hidden="true"
+                  >
+                    <path
+                      vectorEffect="non-scaling-stroke"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z"
+                    />
+                  </svg>
+                  <h3 className="mt-2 text-sm font-medium text-gray-900">No projects</h3>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Get started by creating a new project.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* modal */}
+      <div
+        className={`${
+          dashboardState.showUploader
+            ? 'top-0 !z-[1000] opacity-100'
+            : 'top-full bottom-0 opacity-0'
+        } fixed flex flex-col items-center h-full w-full px-[30px] justify-center bg-white  transition-all duration-500 ease overscroll-auto overflow-auto min-h-screen`}
+      >
+        <button
+          onClick={() => updateState({ showUploader: false })}
+          className="absolute top-5 right-5 p-[12px] rounded-full bg-transparent hover:bg-gray-300 hover:text-white font-[600] w-[48px] h-[48px]"
+        >
+          <svg
+            class="hover:scale-125 hover:fill-red-500"
+            focusable="false"
+            viewBox="0 0 24 24"
+            color="#69717A"
+            aria-hidden="true"
+            data-testid="close-upload-media-dialog-btn"
+          >
+            <path d="M18.3 5.71a.9959.9959 0 00-1.41 0L12 10.59 7.11 5.7a.9959.9959 0 00-1.41 0c-.39.39-.39 1.02 0 1.41L10.59 12 5.7 16.89c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0L12 13.41l4.89 4.89c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41L13.41 12l4.89-4.89c.38-.38.38-1.02 0-1.4z"></path>
+          </svg>
+        </button>
+
+        <div className="mt-10 sm:mt-0 w-full max-w-xl">
+          <form action="#" onSubmit={handleCreateProject}>
+            <div className="overflow-hidden shadow sm:rounded-md">
+              <div className="bg-white sm:rounded-md px-4 py-5 sm:p-6 w-full max-w-xl  border border-gray-100">
+                <div className="flex flex-col gap-6">
+                  <div className="">
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                      Name
+                    </label>
+                    <input
+                      type="text"
+                      name="name"
+                      id="name"
+                      required
+                      minLength={10}
+                      className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                      placeholder="Project name goes here"
+                    />
+                  </div>
+
+                  <div className="">
+                    <label htmlFor="about" className="block text-sm font-medium text-gray-700">
+                      Description
+                    </label>
+                    <div className="mt-1">
+                      <textarea
+                        id="description"
+                        name="description"
+                        rows={5}
+                        required
+                        minLength={30}
+                        className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                        placeholder="Description of the project goes here "
+                        defaultValue={''}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="">
+                    <label
+                      htmlFor="expectation_accuracy"
+                      className="block text-sm font-medium text-gray-700"
+                    >
+                      Expectation Accuracy
+                    </label>
+                    <input
+                      type="number"
+                      name="expectation_accuracy"
+                      id="expectation_accuracy"
+                      required
+                      min={0}
+                      max={100}
+                      placeholder="0-100"
+                      className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                    />
+                  </div>
+
+                  <div className="">
+                    <label htmlFor="country" className="block text-sm font-medium text-gray-700">
+                      Project Type
+                    </label>
+                    <select
+                      id="type"
+                      name="type"
+                      className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                    >
+                      <option>CLASSIFICATION</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div className="bg-gray-50 px-4 py-3 text-right sm:px-6">
+                <button
+                  type="submit"
+                  className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+          </form>
         </div>
       </div>
     </>
