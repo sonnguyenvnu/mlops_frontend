@@ -300,19 +300,17 @@ const Preview = ({ images, pagination, savedLabels, next, updateFields }) => {
     next()
   }
   const handlePageChange = async (page) => {
-    console.log(page)
-    // call api to get new images
     const searchParams = new URLSearchParams(location.search)
     const id = searchParams.get('id')
     if (id) {
+      setIsLoading(true)
       const { data } = await listImages(id, `&page=${page}&size=24`)
-      console.log(data)
-      // return pagination
       setPaginationStep2({ ...paginationStep2, currentPage: page })
       updateFields({
         ...data.data,
         pagination: data.meta,
       })
+      setIsLoading(false)
     }
   }
   const handleStopTrain = async () => {
@@ -415,11 +413,13 @@ const Preview = ({ images, pagination, savedLabels, next, updateFields }) => {
             )}
           </div>
         </div>
-        <Pagination
-          currentPage={paginationStep2.currentPage}
-          totalPages={paginationStep2.totalPages}
-          onChange={handlePageChange}
-        />
+        {images && (
+          <Pagination
+            currentPage={paginationStep2.currentPage}
+            totalPages={paginationStep2.totalPages}
+            onChange={handlePageChange}
+          />
+        )}
       </div>
       <Transition.Root show={openOptions} as={Fragment}>
         <Dialog

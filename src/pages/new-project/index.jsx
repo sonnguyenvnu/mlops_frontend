@@ -15,10 +15,6 @@ const stepData = [
 ]
 
 export default function NewProject(props) {
-  // const [steps, setStep] = useState({
-  //   stepsItems: ['Profile', 'Contact', 'Identity', 'Passport'],
-  //   currentStep: 2,
-  // })
   function updateFields(fields) {
     if (fields.isDoneStepOne) {
       next()
@@ -41,18 +37,9 @@ export default function NewProject(props) {
   const [data, setData] = useState({})
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search)
-
-    async function fetchListLabelingImages(id) {
-      const { data } = await listImages(id)
-      setData({
-        ...data.data,
-        pagination: data.meta,
-      })
-    }
-    const id = searchParams.get('id')
-    if (id) {
-      fetchListLabelingImages(id)
-      goTo(1)
+    const step = searchParams.get('step')
+    if (step) {
+      goTo(parseInt(step))
     }
   }, [])
   console.log(data)
@@ -66,7 +53,7 @@ export default function NewProject(props) {
     ])
 
   return (
-    <div className="relative flex min-h-full flex-col p-5 ">
+    <div className="relative flex flex-col p-5 ">
       <div
         aria-label="Progress"
         className="p-5 bg-white border border-solid border-gray-300 rounded-md overflow-hidden"

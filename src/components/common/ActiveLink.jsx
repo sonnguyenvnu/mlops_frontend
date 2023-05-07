@@ -6,7 +6,7 @@ const ActiveLink = (props) => {
     <NavLink
       {...props}
       className={({ isActive }) => {
-        return isActive ? props.activeClassName : props.defaultClassName
+        return isActive ? props.activeclassname : props.defaultclassname
       }}
     />
   )

@@ -1,4 +1,5 @@
-import React, { useEffect, useReducer } from 'react'
+import { Dialog, Transition } from '@headlessui/react'
+import React, { Fragment, useReducer } from 'react'
 import { UploadTypes } from '../../../assets/data/constants'
 import Loading from '../../../components/Loading'
 import { validateFiles } from '../../../utils/file'
@@ -6,6 +7,7 @@ import { validateFiles } from '../../../utils/file'
 const initialState = {
   showUploadModal: false,
   showPredictModal: false,
+  showResultModal: false,
   predictFile: { url: '', label: '' },
   uploadFiles: [],
   seletedImage: null,
@@ -14,6 +16,7 @@ const initialState = {
   confidences: [],
   confidenceLabel: '',
   confidenceScore: 0,
+  userConfirm: [],
 }
 const StepFour = (props) => {
   const { experiment_name } = props
@@ -33,21 +36,30 @@ const StepFour = (props) => {
     updateState({
       isLoading: true,
     })
-    fetch('http://35.223.5.214:4000/predict', {
+    fetch(`https://8a23-34-125-252-20.ngrok-free.app/predict`, {
       method: 'POST',
+      // headers: {
+      //   'Content-Type': 'multipart/form-data',
+      // },
       body: formData,
     })
       .then((res) => res.json())
       .then((data) => {
         const { predictions } = data
         console.log(URL.createObjectURL(validFiles[0]))
+        const images = predictions.map((item) => ({
+          id: item.key,
+          value: null,
+          label: item.class,
+        }))
         updateState({
           uploadFiles: validFiles,
           seletedImage: validFiles[0],
           confidences: predictions,
-          confidenceScore: predictions[0].confidence,
+          confidenceScore: parseFloat(predictions[0].confidence),
           confidenceLabel: predictions[0].class,
           isLoading: false,
+          userConfirm: images,
         })
       })
   }
@@ -94,9 +106,126 @@ const StepFour = (props) => {
       confidenceLabel: stepFourState.confidences[fileIndex].class,
     })
   }
-
+  const handleConfirmImage = (value) => {
+    const currentImageSeletedIndex = stepFourState.uploadFiles.findIndex(
+      (file) => file.name === stepFourState.seletedImage.name
+    )
+    updateState({
+      userConfirm: stepFourState.userConfirm.map((item, index) => {
+        if (index === currentImageSeletedIndex) {
+          return { ...item, value: value }
+        }
+        return item
+      }),
+    })
+  }
   return (
     <>
+      <Transition.Root show={stepFourState.showResultModal} as={Fragment}>
+        <Dialog
+          as="div"
+          className="relative z-[999999]"
+          onClose={(value) => {
+            updateState({ showResultModal: value })
+          }}
+        >
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 z-10 overflow-y-auto">
+            <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                enterTo="opacity-100 translate-y-0 sm:scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 translate-y-0 sm:scale-100"
+                leaveTo="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+              >
+                <Dialog.Panel className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg">
+                  {/* title */}
+                  <div className="bg-white p-[10px] divide-y-2 divide-solid divide-slate-50">
+                    <div className="flex justify-between items-center mb-5">
+                      <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                        <Dialog.Title
+                          as="h3"
+                          className="text-base font-semibold leading-6 text-gray-900"
+                        >
+                          Prediction Result
+                        </Dialog.Title>
+                      </div>
+                      <div className="text-[30px] text-gray-400 mx-auto flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full bg-transparent hover:text-red-200 sm:mx-0 sm:h-10 sm:w-10">
+                        <button
+                          onClick={() =>
+                            updateState({
+                              showResultModal: false,
+                            })
+                          }
+                        >
+                          ×
+                        </button>
+                      </div>
+                    </div>
+
+                    <h3 className="text-[#666] text-[14px] font-[700] p-[15px]">
+                      Total Prediction:{' '}
+                      <strong className="text-blue-600">{stepFourState.uploadFiles?.length}</strong>
+                    </h3>
+
+                    <h3 className="text-[#666] text-[14px] font-[700] p-[15px]">
+                      Correct Prediction:{' '}
+                      <strong className="text-blue-600">
+                        {' '}
+                        {stepFourState.userConfirm.filter((item) => item.value === 'true')?.length}
+                      </strong>
+                    </h3>
+
+                    <h3 className="text-[#666] text-[14px] font-[700] p-[15px]">
+                      Correct Prediction:{' '}
+                      <strong className="text-blue-600">
+                        {parseFloat(
+                          stepFourState.userConfirm.filter((item) => item.value === 'true')
+                            ?.length / stepFourState.uploadFiles?.length
+                        ).toFixed(2)}
+                      </strong>
+                    </h3>
+
+                    <div className="images-container flex flex-wrap gap-y-4 justify-center"></div>
+                  </div>
+                  {/* button */}
+                  <div className="bg-gray-50 px-4 py-3 sm:flex sm:px-6 justify-start">
+                    <button
+                      type="button"
+                      className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
+                      onClick={() => updateState({ showResultModal: false })}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="button"
+                      className="ml-auto w-fit inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                      onClick={() => updateState({ showResultModal: false })}
+                    >
+                      Deploy
+                    </button>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition.Root>
+
       <div className="mt-20 flex justify-center items-center flex-col gap-6">
         <button
           onClick={() => {
@@ -111,7 +240,7 @@ const StepFour = (props) => {
       <div
         className={`${
           stepFourState.showUploadModal
-            ? 'top-0 left-0 bottom-full z-[99999] opacity-100'
+            ? 'top-0 left-0 bottom-full z-[1000] opacity-100'
             : 'left-0 top-full bottom-0 opacity-0'
         } fixed flex flex-col items-center h-full w-full px-[30px] justify-center bg-white  transition-all duration-500 ease overflow-auto`}
       >
@@ -155,13 +284,15 @@ const StepFour = (props) => {
                     </div>
 
                     <div className="flex gap-5 overflow-x-scroll overflow-y-hidden mt-10">
-                      {stepFourState.uploadFiles.map((item) => (
+                      {stepFourState.uploadFiles.map((item, index) => (
                         <div
                           class={`${
-                            stepFourState.seletedImage === item
-                              ? 'border-4 border-blue-600 border-solid '
+                            typeof stepFourState?.userConfirm[index].value === 'string'
+                              ? stepFourState?.userConfirm[index].value === 'true'
+                                ? 'border-4 border-green-500 border-solid'
+                                : 'border-4 border-red-600 border-solid'
                               : ''
-                          }bg-[#F3F6F9] rounded-[8px] h-[130px] min-w-[200px] p-2 flex   justify-center `}
+                          } bg-[#F3F6F9] rounded-[8px] h-[130px] min-w-[200px] p-2 flex   justify-center `}
                           onClick={() => handleSeletedImage(item)}
                         >
                           <img
@@ -177,36 +308,42 @@ const StepFour = (props) => {
 
               <section aria-labelledby="timeline-title" className="lg:col-span-2">
                 <div className="bg-white text-base font-medium px-4 py-5 shadow sm:rounded-lg sm:px-6">
-                  <span>
-                    Label:{' '}
-                    <strong className="text-blue-700">{stepFourState.confidenceLabel}</strong>
-                  </span>
-                  <br />
-                  Confidence:{' '}
-                  <strong className="text-blue-700">{stepFourState.confidenceScore}</strong>
-                  <div className="ml-auto w-fit my-5">
-                    {stepFourState.isDeploying ? (
+                  <div className="flex w-full justify-end items-center">
+                    {!stepFourState.userConfirm.some((item) => item.value === null) && (
                       <button
-                        onClick={handleStopDeploy}
+                        onClick={(e) => {
+                          updateState({ showResultModal: true })
+                        }}
                         type="button"
-                        className="w-fit inline-flex items-center justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                        className="ml-auto w-fit inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                       >
-                        Stop
-                      </button>
-                    ) : (
-                      <button
-                        onClick={handleDeploy}
-                        type="button"
-                        className="w-fit inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                      >
-                        Deploy
+                        View Result
                       </button>
                     )}
                   </div>
+                  <div className="ml-auto my-5 flex gap-5 justify-between w-full">
+                    <button
+                      onClick={(e) => handleConfirmImage('false')}
+                      type="button"
+                      className="w-fit inline-flex items-center justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+                    >
+                      Incorrect
+                    </button>
+                    <button
+                      onClick={(e) => handleConfirmImage('true')}
+                      type="button"
+                      className="w-fit inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                    >
+                      Correct
+                    </button>
+                  </div>
                   <div class="h-full min-h-[300px] bg-[#e1e4e8]  p-4 w-full rounded-md mb-5 m-auto flex">
-                    {/* <pre className="overflow-auto">
-                      <code>{stepFourState.jsonResult}</code>
-                    </pre> */}
+                    <div className="bg-[#49525e] rounded-2xl border-2 border-dashed border-gray-200 text-white h-fit px-4 py-1">
+                      <span>
+                        {stepFourState.confidenceLabel}:{' '}
+                        <strong> {parseFloat(stepFourState.confidenceScore).toFixed(2)}</strong>
+                      </span>
+                    </div>
                   </div>
                 </div>
               </section>

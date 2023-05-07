@@ -1,9 +1,10 @@
 import { message } from 'antd'
 import React, { useReducer } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import * as projectAPI from '../../api/project'
 import { UploadTypes } from '../../assets/data/constants'
 import { validateFiles } from '../../utils/file'
+import Loading from '../../components/Loading'
 
 const LOAD_CHUNK = 10
 
@@ -13,10 +14,12 @@ const initialState = {
   selectedBuild: null,
   uploadFiles: [],
   loadedChunk: LOAD_CHUNK,
+  isUploading: false,
 }
 
-const Dashboard = () => {
+const Dashboard = ({ updateFields }) => {
   const navigate = useNavigate()
+  const location = useLocation()
 
   //state
   const [dashboardState, updateState] = useReducer((pre, next) => {
@@ -47,15 +50,24 @@ const Dashboard = () => {
         const fileNameBase64 = window.btoa(dashboardState.uploadFiles[i].webkitRelativePath)
         formData.append('files', dashboardState.uploadFiles[i], fileNameBase64)
       }
-
+      const searchParams = new URLSearchParams(location.search)
+      const projectID = searchParams.get('id')
       // TODO: Remove this line
-      const projectID = '641ac7fd897b5152aaa371e9'
       const queryString = new URLSearchParams({ id: projectID }).toString()
       try {
+        updateState({ isUploading: true })
         const { data } = await projectAPI.uploadFiles(projectID, formData)
         message.success('Successfully uploaded', 3)
-        navigate(`/app/new-project?${queryString}`, { replace: true })
+        updateState({ isUploading: false })
+        updateFields({
+          isDoneStepOne: true,
+          ...data,
+        })
+        // navigate(`/app/new-project?${queryString}`, { replace: true });
       } catch (error) {
+        updateState({ isUploading: false })
+        message.error('Upload Failed', 3)
+
         console.error(error)
       }
     }
@@ -72,13 +84,12 @@ const Dashboard = () => {
 
   return (
     <>
-      {/* classify model */}
-
+      {dashboardState.isUploading ? <Loading /> : ''}
       {/* uploaded */}
       <div
         onClick={() => updateState({ show: true })}
         // for="file"
-        className="flex flex-col w-[95%] cursor-pointer my-10 shadow justify-between mx-auto items-center p-[10px] gap-[5px] bg-[rgba(0,110,255,0.041)]  rounded-[10px] h-[calc(100%-124px)]"
+        className="flex flex-col w-[95%] cursor-pointer my-10 shadow justify-between mx-auto items-center p-[10px] gap-[5px] bg-[rgba(0,110,255,0.041)]  rounded-[10px] h-[calc(100%-124px)] min-h-[500px]"
       >
         <div className="header flex flex-1 w-full border-[2px] justify-center items-center flex-col border-dashed border-[#4169e1] rounded-[10px]">
           <svg
@@ -124,7 +135,7 @@ const Dashboard = () => {
       <div
         className={`${
           dashboardState.show
-            ? 'top-0 bottom-full z-[99999] opacity-100'
+            ? 'top-0 bottom-full z-[1000] opacity-100 left-0'
             : 'top-full bottom-0 opacity-0'
         } fixed flex flex-col items-center h-full w-full px-[30px] justify-center bg-white  transition-all duration-500 ease`}
       >
@@ -185,10 +196,8 @@ const Dashboard = () => {
       {/* bottom up modal of classify image uploader */}
       <div
         className={`${
-          dashboardState.showUploader
-            ? 'top-0 z-[99999] opacity-100'
-            : 'top-full bottom-0 opacity-0'
-        } fixed flex flex-col items-center h-full w-full px-[30px] justify-center bg-white  transition-all duration-500 ease overscroll-auto overflow-auto min-h-screen`}
+          dashboardState.showUploader ? 'top-0 z-[1000] opacity-100' : 'top-full bottom-0 opacity-0'
+        } fixed flex flex-col items-center h-full w-full justify-center bg-white  transition-all duration-500 ease overscroll-auto min-h-screen left-0  overflow-hidden`}
       >
         <button
           onClick={() => updateState({ showUploader: false, uploadFiles: [] })}
@@ -205,7 +214,7 @@ const Dashboard = () => {
             <path d="M18.3 5.71a.9959.9959 0 00-1.41 0L12 10.59 7.11 5.7a.9959.9959 0 00-1.41 0c-.39.39-.39 1.02 0 1.41L10.59 12 5.7 16.89c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0L12 13.41l4.89 4.89c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41L13.41 12l4.89-4.89c.38-.38.38-1.02 0-1.4z"></path>
           </svg>
         </button>
-        <div className="h-[3000px] overflow-auto py-[100px] w-[calc(100vw-20px)]">
+        <div className="h-[3000px] overflow-auto py-[100px] w-full left-0 px-10 ">
           <h3 className="text-center w-full text-[24px] font-[500] leading-[1.16] mb-8 ">
             Classified images upload
           </h3>
