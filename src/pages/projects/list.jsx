@@ -18,7 +18,6 @@ export default function ProjectList() {
     event.preventDefault()
     const formData = new FormData(event.target)
     const data = Object.fromEntries(formData)
-    console.log(data)
     try {
       const response = await instance.post('/projects', data, {
         headers: {
@@ -171,7 +170,7 @@ export default function ProjectList() {
                         name="description"
                         rows={5}
                         required
-                        minLength={30}
+                        minLength={5}
                         className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
                         placeholder="Description of the project goes here "
                         defaultValue={''}

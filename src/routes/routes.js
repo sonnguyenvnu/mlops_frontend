@@ -8,6 +8,8 @@ import Preview from '../pages/preview'
 import NewProject from '../pages/new-project'
 import SignUp from '../pages/signup'
 import Profile from '../pages/profile'
+import ModelList from '../pages/models/list'
+import Predict from '../pages/predict'
 
 const routes = [
   {
@@ -21,10 +23,6 @@ const routes = [
   {
     path: paths.SIGNUP,
     element: <SignUp />,
-  },
-  {
-    path: paths.PROFILE,
-    element: <Profile />,
   },
   {
     path: paths.DEFAULT,
@@ -51,6 +49,14 @@ const routes = [
       {
         path: '/app/new-project',
         element: <NewProject />,
+      },
+      {
+        path: '/app/models',
+        element: <ModelList />,
+      },
+      {
+        path: '/app/predict',
+        element: <Predict />,
       },
     ],
   },

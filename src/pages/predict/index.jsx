@@ -1,14 +1,12 @@
 import { Dialog, Transition } from '@headlessui/react'
 import { message } from 'antd'
 import React, { Fragment, useReducer } from 'react'
-import { useLocation, useSearchParams, useNavigate } from 'react-router-dom'
-import { UploadTypes } from '../../../assets/data/constants'
-import Loading from '../../../components/Loading'
-import { validateFiles } from '../../../utils/file'
-import instance from '../../../api/axios'
+import { useLocation, useSearchParams } from 'react-router-dom'
+import Loading from '../../components/Loading'
+import { validateFiles } from '../../utils/file'
 
 const initialState = {
-  showUploadModal: false,
+  showUploadModal: true,
   showPredictModal: false,
   showResultModal: false,
   predictFile: { url: '', label: '' },
@@ -21,9 +19,8 @@ const initialState = {
   confidenceScore: 0,
   userConfirm: [],
 }
-const StepFour = (props) => {
+const Predict = (props) => {
   const location = useLocation()
-  const navigate = useNavigate()
   const searchParams = new URLSearchParams(location.search)
   const experimentName = searchParams.get('experiment_name')
   const [stepFourState, updateState] = useReducer(
@@ -72,7 +69,7 @@ const StepFour = (props) => {
         })
       })
       .catch(err => updateState({ isLoading: false }))
-    }, 20000);
+    }, 100);
 
   }
 
@@ -82,14 +79,6 @@ const StepFour = (props) => {
     .then(data => console.log(data))
     .catch(err => console.log(err))
   }
-  const saveBestModel = async () => {
-    try {
-      await instance.get(`${process.env.REACT_APP_API_URL}/experiments/save-model?experiment_name=${experimentName}`)
-    } catch (error) {
-      console.error(error)
-    }
-  }
-
   const handleSeletedImage = async (item) => {
     const fileIndex = stepFourState.uploadFiles.findIndex((file) => file.name === item.name)
     updateState({
@@ -202,76 +191,14 @@ const StepFour = (props) => {
 
                     <div className="images-container flex flex-wrap gap-y-4 justify-center"></div>
                   </div>
-                  {/* button */}
-                  <div className="bg-gray-50 px-4 py-3 sm:flex sm:px-6 justify-start">
-                    <button
-                      type="button"
-                      className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto"
-                      onClick={() => updateState({ showResultModal: false })}
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="button"
-                      className="ml-auto w-fit inline-flex items-center justify-center rounded-md border border-transparent bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                      onClick={() => {
-                        updateState({ showResultModal: false, isLoading: true })
-                        saveBestModel()
-                        const timer = setTimeout(() => {
-                          updateState({ isLoading: false })
-                          message.success('Your model is deployed', 2)
-                          navigate('/app/models', { replace: true })
-                          clearTimeout(timer)
-                        }, 5000);
-                      }}
-                    >
-                      Deploy
-                    </button>
-                  </div>
                 </Dialog.Panel>
               </Transition.Child>
             </div>
           </div>
         </Dialog>
       </Transition.Root>
-
-      <div className="mt-20 flex justify-center items-center flex-col gap-6">
-        <button
-          onClick={() => {
-            updateState({ showUploadModal: true })
-            handleDeploy()
-          }}
-          className="rounded-md bg-indigo-600 py-[6px] px-4 text-white"
-          // hidden
-        >
-          Predict
-        </button>
-      </div>
-      <div
-        className={`${
-          stepFourState.showUploadModal
-            ? 'top-0 left-0 bottom-full z-[1000] opacity-100'
-            : 'left-0 top-full bottom-0 opacity-0'
-        } fixed flex flex-col items-center h-full w-full px-[30px] justify-center bg-white  transition-all duration-500 ease overflow-auto`}
-      >
-        <button
-          onClick={() => {
-            updateState(initialState)
-          }}
-          className="absolute top-5 right-5 p-[12px] rounded-full bg-white hover:bg-gray-300 hover:text-white font-[600] w-[48px] h-[48px]"
-        >
-          <svg
-            class="hover:scale-125 hover:fill-red-500"
-            focusable="false"
-            viewBox="0 0 24 24"
-            color="#69717A"
-            aria-hidden="true"
-            data-testid="close-upload-media-dialog-btn"
-          >
-            <path d="M18.3 5.71a.9959.9959 0 00-1.41 0L12 10.59 7.11 5.7a.9959.9959 0 00-1.41 0c-.39.39-.39 1.02 0 1.41L10.59 12 5.7 16.89c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0L12 13.41l4.89 4.89c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41L13.41 12l4.89-4.89c.38-.38.38-1.02 0-1.4z"></path>
-          </svg>
-        </button>
-        {stepFourState.isLoading && <Loading />}
+      
+      {stepFourState.isLoading && <Loading />}
 
         {/* uploaded */}
         {stepFourState.uploadFiles.length > 0 ? (
@@ -366,7 +293,7 @@ const StepFour = (props) => {
             htmlFor="file"
             onClick={() => updateState({ showPredictModal: true })}
             // for="file"
-            className="flex flex-col w-[95%] cursor-pointer mt-10 shadow justify-between mx-auto items-center p-[10px] gap-[5px] bg-[rgba(0,110,255,0.041)] h-[300px] rounded-[10px] "
+            className="flex flex-col w-[95%] h-[650px] cursor-pointer mt-10 shadow justify-between mx-auto items-center p-[10px] gap-[5px] bg-[rgba(0,110,255,0.041)] h-[300px] rounded-[10px] "
           >
             <div className="header flex flex-1 w-full border-[2px] justify-center items-center flex-col border-dashed border-[#4169e1] rounded-[10px]">
               <svg
@@ -408,9 +335,8 @@ const StepFour = (props) => {
             />
           </label>
         )}
-      </div>
     </>
   )
 }
 
-export default StepFour
+export default Predict

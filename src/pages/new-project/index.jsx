@@ -17,16 +17,16 @@ const stepData = [
 export default function NewProject(props) {
   function updateFields(fields) {
     if (fields.isDoneStepOne) {
-      next()
+      goTo(1)
     }
     if (fields.isDoneStepTwo) {
-      next()
+      goTo(2)
     }
     if (fields.isDoneStepThree) {
-      next()
+      goTo(3)
     }
     if (fields.isDoneStepFour) {
-      next()
+      goTo(4)
     }
     setData((prev) => {
       return { ...prev, ...fields }
@@ -42,7 +42,6 @@ export default function NewProject(props) {
       goTo(parseInt(step))
     }
   }, [])
-  console.log(data)
 
   const { steps, currentStepIndex, step, isFirstStep, isLastStep, back, next, goTo } =
     useMultistepForm([
@@ -62,9 +61,11 @@ export default function NewProject(props) {
           <ul aria-label="Steps" className="items-center text-gray-600 font-medium md:flex">
             {stepData.map((item, idx) => (
               <li
-                onClick={() => {
-                  goTo(idx + 1)
-                }}
+                // onClick={() => {
+                //   if (idx <= 2 && idx > 0) {
+                //     goTo(idx)
+                //   }
+                // }}
                 aria-current={currentStepIndex === idx + 1 ? 'step' : false}
                 className="flex-1 last:flex-none flex gap-x-2 md:items-center"
               >
@@ -79,7 +80,8 @@ export default function NewProject(props) {
                     }`}
                   >
                     <span
-                      className={` ${
+                      id={`step-${idx + 1}`}
+                      className={`next-step ${
                         currentStepIndex > idx
                           ? 'hidden'
                           : '' || currentStepIndex == idx

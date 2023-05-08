@@ -6,6 +6,8 @@ const paths = Object.freeze({
   DASHBOARD: '/app/dashboard',
   PROJECTS: '/app/projects',
   PROFILE: '/profile',
+  MODELS: '/app/models',
+  PREDICT: '/app/predict',
 })
 
 export { paths }

@@ -1,4 +1,6 @@
 import React from 'react'
+import { useEffect } from 'react'
+import { useState } from 'react'
 import {
   CartesianGrid,
   Line,
@@ -8,20 +10,11 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-const data = [
-  { name: 'Page A', uv: 4000 },
-  { name: 'Page B', uv: 3000 },
-  { name: 'Page C', uv: 2000 },
-  { name: 'Page D', uv: 1800 },
-  { name: 'Page E', uv: 1890 },
-  { name: 'Page F', uv: 2390 },
-  { name: 'Page G', uv: 3490 },
-]
 
-export const TrainingChart = () => {
+export const TrainingChart = ({ data, color="#8884d8" }) => {
   return (
     <div style={{ width: '100%' }}>
-      <ResponsiveContainer width="100%" height={200}>
+      <ResponsiveContainer width="100%" height={300}>
         <LineChart
           width={500}
           height={200}
@@ -37,7 +30,7 @@ export const TrainingChart = () => {
           <XAxis dataKey="name" />
           <YAxis />
           <Tooltip />
-          <Line connectNulls type="linear" dataKey="uv" stroke="#8884d8" fill="#8884d8" />
+          <Line connectNulls type="linear" dataKey="value" stroke={color} fill={color} />
         </LineChart>
       </ResponsiveContainer>
     </div>

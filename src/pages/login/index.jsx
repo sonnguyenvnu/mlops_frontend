@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom'
 import Cookies from 'universal-cookie'
 import * as auth from '../../api/auth'
 import logo from '../../assets/images/logo.png'
-import useToast from '../../hooks/useToastMessage'
 import { validateEmail, validatePassword } from '../../utils/validate'
 
 const Login = () => {
@@ -12,10 +11,10 @@ const Login = () => {
   const navigate = useNavigate()
   const writeCookies = ({ accessToken, refreshToken }) => {
     const cookieOptions = {
-      // domain: `.${process.env.REACT_APP_DOMAIN_NAME}`,
+      domain: `.${process.env.REACT_APP_DOMAIN_NAME}`,
       path: '/',
-      // secure: true,
-      // sameSite: 'none',
+      secure: true,
+      sameSite: 'none',
     }
     cookies.set('accessToken', accessToken, cookieOptions)
     if (refreshToken) {
@@ -27,7 +26,7 @@ const Login = () => {
       const { data } = await auth.login(credential)
       writeCookies({ accessToken: data.access_token, refreshToken: data.refresh_token })
 
-      navigate('/app/dashboard', { replace: true })
+      navigate('/app/projects', { replace: true })
     } catch (error) {
       console.error(error)
     }

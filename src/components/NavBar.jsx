@@ -1,6 +1,7 @@
 import { Disclosure, Menu, Transition } from '@headlessui/react'
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
 import { Fragment } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { paths } from '../assets/data/routes'
 import logo from '../assets/images/logo.png'
 import ActiveLink from './common/ActiveLink'
@@ -14,6 +15,11 @@ const NavBar = () => {
     'inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700'
   const activeclassname =
     'inline-flex items-center border-b-2 border-indigo-500 px-1 pt-1 text-sm font-medium text-gray-900'
+
+  const navigate = useNavigate()
+  const logout = () => {
+    navigate('/', { replace: true })
+  }
 
   return (
     <Disclosure as="nav" className="bg-white shadow-lg z-[999] relative">
@@ -45,6 +51,14 @@ const NavBar = () => {
                     // className={({ isActive }) => (isActive ? activeClassName : defaultClassName)}
                   >
                     Projects
+                  </ActiveLink>
+                  <ActiveLink
+                    to={paths.MODELS}
+                    defaultclassname={defaultclassname}
+                    activeclassname={activeclassname}
+                    // className={({ isActive }) => (isActive ? activeClassName : defaultClassName)}
+                  >
+                    Models
                   </ActiveLink>
                 </div>
               </div>
@@ -100,14 +114,14 @@ const NavBar = () => {
                       <Menu.Item>
                         {({ active }) => (
                           <a
-                            href="#"
-                            className={classNames(
-                              active ? 'bg-gray-100' : '',
-                              'block px-4 py-2 text-sm text-gray-700'
-                            )}
-                          >
-                            Sign out
-                          </a>
+                              href="/"
+                              className={classNames(
+                                active ? 'bg-gray-100' : '',
+                                'block px-4 py-2 text-sm text-gray-700'
+                              )}
+                            >
+                              Sign out
+                            </a>
                         )}
                       </Menu.Item>
                     </Menu.Items>
@@ -116,40 +130,6 @@ const NavBar = () => {
               </div>
             </div>
           </div>
-
-          <Disclosure.Panel className="sm:hidden">
-            <div className="space-y-1 pt-2 pb-4">
-              {/* Current: "bg-indigo-50 border-indigo-500 text-indigo-700", Default: "border-transparent text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700" */}
-              <Disclosure.Button
-                as="a"
-                href="#"
-                className="block border-l-4 border-indigo-500 bg-indigo-50 py-2 pl-3 pr-4 text-base font-medium text-indigo-700"
-              >
-                Dashboard
-              </Disclosure.Button>
-              <Disclosure.Button
-                as="a"
-                href="#"
-                className="block border-l-4 border-transparent py-2 pl-3 pr-4 text-base font-medium text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700"
-              >
-                Team
-              </Disclosure.Button>
-              <Disclosure.Button
-                as="a"
-                href="#"
-                className="block border-l-4 border-transparent py-2 pl-3 pr-4 text-base font-medium text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700"
-              >
-                Projects
-              </Disclosure.Button>
-              <Disclosure.Button
-                as="a"
-                href="#"
-                className="block border-l-4 border-transparent py-2 pl-3 pr-4 text-base font-medium text-gray-500 hover:border-gray-300 hover:bg-gray-50 hover:text-gray-700"
-              >
-                Calendar
-              </Disclosure.Button>
-            </div>
-          </Disclosure.Panel>
         </>
       )}
     </Disclosure>
