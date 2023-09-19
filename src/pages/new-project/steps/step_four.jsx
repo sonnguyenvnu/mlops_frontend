@@ -261,7 +261,7 @@ const StepFour = (props) => {
           className="absolute top-5 right-5 p-[12px] rounded-full bg-white hover:bg-gray-300 hover:text-white font-[600] w-[48px] h-[48px]"
         >
           <svg
-            class="hover:scale-125 hover:fill-red-500"
+            className="hover:scale-125 hover:fill-red-500"
             focusable="false"
             viewBox="0 0 24 24"
             color="#69717A"
@@ -288,6 +288,7 @@ const StepFour = (props) => {
                       {stepFourState.seletedImage && (
                         <img
                           src={URL.createObjectURL(stepFourState.seletedImage)}
+                          alt=""
                           className="object-contain rounded-[8px]"
                         />
                       )}
@@ -309,6 +310,7 @@ const StepFour = (props) => {
                         >
                           <img
                             src={URL.createObjectURL(item)}
+                            alt=""
                             className="object-contain  rounded-[8px]"
                           />
                         </div>
@@ -349,7 +351,7 @@ const StepFour = (props) => {
                       Correct
                     </button>
                   </div>
-                  <div class="h-full min-h-[300px] bg-[#e1e4e8]  p-4 w-full rounded-md mb-5 m-auto flex">
+                  <div className="h-full min-h-[300px] bg-[#e1e4e8]  p-4 w-full rounded-md mb-5 m-auto flex">
                     <div className="bg-[#49525e] rounded-2xl border-2 border-dashed border-gray-200 text-white h-fit px-4 py-1">
                       <span>
                         {stepFourState.confidenceLabel}:{' '}

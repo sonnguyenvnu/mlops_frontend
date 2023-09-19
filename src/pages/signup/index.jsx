@@ -1,7 +1,11 @@
 import { useState } from 'react'
 import logo from '../../assets/images/logo.png'
 import { validatePassword } from '../../utils/validate'
+import { signup } from '../../api/auth'
+import { useNavigate } from 'react-router-dom'
 const SignUp = () => {
+  const navigate = useNavigate()
+
   const [formState, setFormState] = useState({
     email: {
       value: '',
@@ -25,13 +29,15 @@ const SignUp = () => {
     },
   })
 
-  const handleSignUp = (e) => {
+  const handleSignUp = async (e) => {
     e.preventDefault()
     const formData = new FormData(e.target)
     const email = formData.get('email')
     const password = formData.get('password')
     const name = formData.get('name')
     console.log(name, email, password)
+    await signup({name, email, password})
+    navigate('/', { replace: false });
   }
 
   const handlePasswordChange = (event) => {
@@ -192,7 +198,7 @@ const SignUp = () => {
             <div>
               <label className="font-medium">Password</label>
               <input
-                type="text"
+                type="password"
                 name="password"
                 // value={formState.name.password}
                 required
@@ -206,7 +212,7 @@ const SignUp = () => {
             <div>
               <label className="font-medium">Confirm password</label>
               <input
-                type="text"
+                type="password"
                 name="confirmPassword"
                 // value={formState.name.confirmPassword}
                 required

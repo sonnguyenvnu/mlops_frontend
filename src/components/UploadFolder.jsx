@@ -68,4 +68,4 @@ const UploadFolder = ({ projectID, uploadedImages }) => {
   )
 }
 
-export default forwardRef(UploadFolder)
+export default UploadFolder

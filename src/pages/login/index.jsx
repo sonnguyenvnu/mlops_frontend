@@ -11,10 +11,12 @@ const Login = () => {
   const navigate = useNavigate()
   const writeCookies = ({ accessToken, refreshToken }) => {
     const cookieOptions = {
-      domain: `.${process.env.REACT_APP_DOMAIN_NAME}`,
       path: '/',
       secure: true,
       sameSite: 'none',
+    }
+    if (process.env.REACT_APP_DOMAIN_NAME) {
+      cookieOptions.domain = process.env.REACT_APP_DOMAIN_NAME
     }
     cookies.set('accessToken', accessToken, cookieOptions)
     if (refreshToken) {
@@ -24,6 +26,7 @@ const Login = () => {
   const onLogin = async (credential) => {
     try {
       const { data } = await auth.login(credential)
+      // console.log(data)
       writeCookies({ accessToken: data.access_token, refreshToken: data.refresh_token })
 
       navigate('/app/projects', { replace: true })

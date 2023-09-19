@@ -52,7 +52,6 @@ export default function ModelList() {
 
               {dashboardState.models.length > 0 ? (
                 <ul
-                  role="list"
                   className="max-w-7xl px-3  mx-auto pt-5 overflow-hidden sm:grid sm:grid-cols-2 gap-3 py-4"
                 >
                   {dashboardState.models.map(model => (

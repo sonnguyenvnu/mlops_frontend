@@ -74,7 +74,7 @@ export default function NewProject(props) {
                     className={`w-8 h-8 rounded-full border-2 flex-none flex items-center justify-center ${
                       currentStepIndex > idx
                         ? 'bg-indigo-600 border-indigo-600'
-                        : '' || currentStepIndex == idx
+                        : '' || currentStepIndex === idx
                         ? 'border-indigo-600'
                         : ''
                     }`}
@@ -84,7 +84,7 @@ export default function NewProject(props) {
                       className={`next-step ${
                         currentStepIndex > idx
                           ? 'hidden'
-                          : '' || currentStepIndex == idx
+                          : '' || currentStepIndex === idx
                           ? 'text-indigo-600'
                           : ''
                       }`}
@@ -112,7 +112,7 @@ export default function NewProject(props) {
                   </div>
                   <hr
                     className={`h-12 border md:hidden ${
-                      idx == steps.length
+                      idx === steps.length
                         ? 'hidden'
                         : '' || currentStepIndex > idx
                         ? 'border-indigo-600'
@@ -121,13 +121,13 @@ export default function NewProject(props) {
                   />
                 </div>
                 <div className="h-8 flex items-center md:h-auto">
-                  <h3 className={`text-sm ${currentStepIndex == idx ? 'text-indigo-600' : ''}`}>
+                  <h3 className={`text-sm ${currentStepIndex === idx ? 'text-indigo-600' : ''}`}>
                     {item.name}
                   </h3>
                 </div>
                 <hr
                   className={`hidden mr-2 w-full border md:block ${
-                    idx == steps.length
+                    idx === steps.length
                       ? 'hidden'
                       : '' || currentStepIndex > idx
                       ? 'border-indigo-600'

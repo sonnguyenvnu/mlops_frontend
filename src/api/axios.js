@@ -20,7 +20,7 @@ instance.interceptors.response.use(
     }
     const status = response.status
     if (status && status === 200) {
-      if (response.msg == 'jwt expired') {
+      if (response.msg === 'jwt expired') {
         cookies.remove('accessToken')
         const { accessToken } = (await refreshToken()).data
         if (accessToken) {

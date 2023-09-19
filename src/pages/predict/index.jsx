@@ -208,7 +208,7 @@ const Predict = (props) => {
                 <section>
                   <div className="bg-white shadow sm:rounded-lg p-5">
                     <div
-                      class={`${
+                      className={`${
                         stepFourState.seletedImage ? '' : 'animate-pulse'
                       } h-[400px] bg-[#e1e4e8]  p-4 w-full rounded-md mb-5 m-auto flex justify-center `}
                     >
@@ -223,7 +223,7 @@ const Predict = (props) => {
                     <div className="flex gap-5 overflow-x-scroll overflow-y-hidden mt-10">
                       {stepFourState.uploadFiles.map((item, index) => (
                         <div
-                          class={`${
+                          className={`${
                             typeof stepFourState?.userConfirm[index].value === 'string'
                               ? stepFourState?.userConfirm[index].value === 'true'
                                 ? 'border-4 border-green-500 border-solid'
@@ -276,7 +276,7 @@ const Predict = (props) => {
                       Correct
                     </button>
                   </div>
-                  <div class="h-full min-h-[300px] bg-[#e1e4e8]  p-4 w-full rounded-md mb-5 m-auto flex">
+                  <div className="h-full min-h-[300px] bg-[#e1e4e8]  p-4 w-full rounded-md mb-5 m-auto flex">
                     <div className="bg-[#49525e] rounded-2xl border-2 border-dashed border-gray-200 text-white h-fit px-4 py-1">
                       <span>
                         {stepFourState.confidenceLabel}:{' '}
